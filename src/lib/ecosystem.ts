@@ -79,7 +79,7 @@ export const ECOSYSTEM_PRODUCTS: EcosystemProduct[] = [
   },
   {
     id: 'elora', logo: eloraLogo, name: 'Elora', url: 'https://elora.liafrik.com', domain: 'elora.liafrik.com', linkable: true,
-    category: 'Pressing', color: '#14B8A6',
+    category: 'Pressing', color: '#1E6FC4',
     tagline: 'La gestion de pressing, à l’échelle mondiale',
     description: 'Dépôts, tickets, suivi des articles, livraison et fidélité — une plateforme pressing pensée pour le monde entier.',
   },
