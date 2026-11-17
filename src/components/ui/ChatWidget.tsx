@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Send, Loader2, User as UserIcon, Sparkles, Headset, RotateCcw } from 'lucide-react';
+import { X, Send, Loader2, User as UserIcon, Headset, RotateCcw } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -210,22 +210,14 @@ export default function ChatWidget() {
           )}
           <button
             onClick={openChat}
-            className="lb-ai-fab group relative w-14 h-14 rounded-full flex items-center justify-center shadow-xl shadow-[#0057D9]/35 hover:scale-110 active:scale-95 transition-transform duration-300"
+            className="lb-ai-fab group relative w-16 h-16 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform duration-300"
             aria-label={isFr ? 'Ouvrir l’assistant IA Libooks' : 'Open the Libooks AI assistant'}
             title="Libooks IA"
           >
-            {/* halo qui respire */}
-            <span className="lb-ai-halo absolute -inset-1 rounded-full" />
-            {/* anneau dégradé en rotation */}
-            <span className="lb-ai-ring absolute inset-0 rounded-full" />
-            {/* cœur blanc + logo */}
-            <span className="relative w-[48px] h-[48px] rounded-full bg-white dark:bg-surface-1 flex items-center justify-center overflow-hidden">
-              <span className="lb-ai-shine absolute inset-0" />
-              <img src={logo} alt="" className="lb-ai-logo relative w-8 h-8 object-contain" />
-            </span>
-            {/* étincelle IA */}
-            <span className="lb-ai-spark absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center text-white ring-2 ring-white dark:ring-surface-1" style={{ background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)' }}>
-              <Sparkles className="w-3 h-3" />
+            <span className="lb-ai-halo absolute inset-1 rounded-full" />
+            <span className="lb-ai-logo relative w-16 h-16 flex items-center justify-center">
+              <span className="absolute w-[80%] h-[80%] rounded-full bg-white" />
+              <img src={logo} alt="Libooks IA" className="relative w-16 h-16 object-contain drop-shadow-[0_8px_18px_rgba(0,87,217,0.35)]" />
             </span>
           </button>
         </div>
