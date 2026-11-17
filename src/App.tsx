@@ -57,6 +57,8 @@ const TermsPage = lazy(() => import('./pages/footer/TermsPage'));
 const CookiePolicyPage = lazy(() => import('./pages/footer/CookiePolicyPage'));
 const RefundPolicyPage = lazy(() => import('./pages/footer/RefundPolicyPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const SecurityPage = lazy(() => import('./pages/TrustPage').then(m => ({ default: m.SecurityPage })));
+const StatusPage = lazy(() => import('./pages/TrustPage').then(m => ({ default: m.StatusPage })));
 const BlogIndexPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogIndexPage })));
 const BlogPostPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogPostPage })));
 
@@ -186,6 +188,12 @@ export default function App() {
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/cookies" element={<CookiePolicyPage />} />
         <Route path="/refund-policy" element={<RefundPolicyPage />} />
+        <Route path="/securite" element={<WithLang lang="fr"><SecurityPage /></WithLang>} />
+        <Route path="/security" element={<Navigate to="/en/securite" replace />} />
+        <Route path="/en/security" element={<Navigate to="/en/securite" replace />} />
+        <Route path="/en/securite" element={<WithLang lang="en"><SecurityPage /></WithLang>} />
+        <Route path="/status" element={<StatusPage />} />
+        <Route path="/en/status" element={<WithLang lang="en"><StatusPage /></WithLang>} />
         <Route path="/blog" element={<WithLang lang="fr"><BlogIndexPage /></WithLang>} />
         <Route path="/blog/:slug" element={<WithLang lang="fr"><BlogPostPage /></WithLang>} />
         <Route path="/en/blog" element={<WithLang lang="en"><BlogIndexPage /></WithLang>} />

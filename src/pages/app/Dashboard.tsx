@@ -17,6 +17,7 @@ import { Link, Navigate } from 'react-router-dom';
 import Badge from '../../components/ui/Badge';
 import { useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
+import GettingStarted from '../../components/dashboard/GettingStarted';
 import DashboardCustomizer, { useDashboardLayout, DashboardWidgetId } from '../../components/dashboard/DashboardCustomizer';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -715,6 +716,8 @@ export default function Dashboard() {
           </button>
         </div>
       )}
+
+      <GettingStarted />
 
       {layout.order.filter((id) => !layout.hidden.includes(id)).map((id) => (
         <div key={id} className="animate-fade-in">{widgetNodes[id]}</div>

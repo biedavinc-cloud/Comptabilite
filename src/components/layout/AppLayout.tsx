@@ -9,6 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getPendingCount } from '../../lib/db';
 import { useTranslation } from 'react-i18next';
 import ChatWidget from '../ui/ChatWidget';
+import { InstallAppButton } from '../ui/InstallApp';
 
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -74,6 +75,7 @@ export default function AppLayout() {
             </div>
           )}
 
+          <InstallAppButton compact className="p-2 rounded-lg text-gray-500 hover:text-[#0057D9] hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-surface-2" />
           <ThemeToggle variant="subtle" />
         </header>
 

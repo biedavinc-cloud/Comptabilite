@@ -286,4 +286,20 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://libooks.liafrik.com/securite</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://libooks.liafrik.com/securite" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://libooks.liafrik.com/en/securite" />
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://libooks.liafrik.com/en/securite</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://libooks.liafrik.com/securite" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://libooks.liafrik.com/en/securite" />
+    <lastmod>2026-11-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>

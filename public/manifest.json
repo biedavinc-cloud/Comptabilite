@@ -1,12 +1,12 @@
 {
-  "name": "LiBooks",
+  "name": "LiBooks — Comptabilité en ligne",
   "short_name": "LiBooks",
-  "description": "Gestion comptable et commerciale internationale, avec une expertise OHADA reconnue",
-  "start_url": "/",
+  "description": "Comptabilité, facturation, stocks et Mobile Money — conforme SYSCOHADA. Par Liafrik Tech.",
+  "start_url": "/app/dashboard?source=pwa",
   "display": "standalone",
   "background_color": "#0F2A3D",
   "theme_color": "#0057D9",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "icons": [
     {
       "src": "/logo-192.png",
@@ -31,6 +31,52 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "id": "/",
+  "scope": "/",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "lang": "fr",
+  "categories": [
+    "business",
+    "finance",
+    "productivity"
+  ],
+  "shortcuts": [
+    {
+      "name": "Nouvelle facture",
+      "short_name": "Facture",
+      "url": "/app/sales-invoices?source=shortcut",
+      "icons": [
+        {
+          "src": "/logo-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Tableau de bord",
+      "short_name": "Dashboard",
+      "url": "/app/dashboard?source=shortcut",
+      "icons": [
+        {
+          "src": "/logo-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Clients",
+      "url": "/app/customers?source=shortcut",
+      "icons": [
+        {
+          "src": "/logo-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

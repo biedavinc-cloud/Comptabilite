@@ -19,7 +19,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { PLAN_LIMITS, MODULES, ModuleKey, COUNTRIES, COMMON_CURRENCIES } from '../lib/countryData';
 import {
-  RotatingWord, LiveFeedCard, StatementSection, StickyFeatures, EcosystemSection, RotatingBadge, FooterWatermark,
+  RotatingWord, LiveFeedCard, StatementSection, StickyFeatures, EcosystemSection, RotatingBadge, FooterWatermark, MobileAppSection,
 } from '../components/landing/Showcase';
 import { ForWhomSection, CoverageSection, PinnedCardStack, GiantFinale } from '../components/landing/Premium';
 import {
@@ -820,6 +820,8 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <MobileAppSection />
+
       <EcosystemSection />
 
       {/* ===== CTA ===== */}
@@ -879,6 +881,8 @@ export default function LandingPage() {
               <ul className="space-y-2.5">
                 <li><Link to={isEn ? '/en/blog' : '/blog'} className="text-sm text-gray-400 hover:text-white transition-colors inline-flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" /> Blog</Link></li>
                 <li><Link to={isEn ? '/en/about' : '/about'} className="text-sm text-gray-400 hover:text-white transition-colors">{isEn ? 'About' : 'À propos'}</Link></li>
+                <li><Link to={isEn ? '/en/securite' : '/securite'} className="text-sm text-gray-400 hover:text-white transition-colors">{isEn ? 'Trust & security' : 'Confiance & sécurité'}</Link></li>
+                <li><Link to={isEn ? '/en/status' : '/status'} className="text-sm text-gray-400 hover:text-white transition-colors inline-flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />{isEn ? 'System status' : 'État des services'}</Link></li>
                 <li><Link to={isEn ? '/en/help' : '/help'} className="text-sm text-gray-400 hover:text-white transition-colors">{isEn ? 'Help Center' : "Centre d'aide"}</Link></li>
                 <li><Link to={isEn ? '/en/developers' : '/developers'} className="text-sm text-gray-400 hover:text-white transition-colors">{isEn ? 'Developers / API' : 'Développeurs / API'}</Link></li>
                 <li><Link to={isEn ? '/en/contact' : '/contact'} className="text-sm text-gray-400 hover:text-white transition-colors">Contact & Support</Link></li>

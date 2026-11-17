@@ -34,7 +34,7 @@ Sellia (alternative africaine à Shopify, https://sellia.liafrik.com), Zanldo (m
 Zanldo Express (SaaS logistique, https://express.zanldo.com), Nutro (POS restaurant premium tablette + KDS, https://nutro.liafrik.com),
 POS Flow (point de vente, https://pos.liafrik.com), Stella (alternative à Fresha, https://stella.liafrik.com),
 Elora (gestion de pressing, https://elora.liafrik.com), Sukulu (gestion scolaire, https://gosukulu.com),
-Health Cloud (gestion hôpitaux & cliniques), afrik.cloud (vitrine gratuite des talents africains, https://afrik.cloud).
+Health Cloud (gestion hôpitaux & cliniques), Atlas CRM (CRM commercial), afrik.cloud (vitrine gratuite des talents africains, https://afrik.cloud).
 Écris toujours « Liafrik » (et non « LiAfrik »).
 `;
 

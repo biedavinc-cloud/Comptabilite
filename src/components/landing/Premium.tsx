@@ -6,6 +6,8 @@ import { ArrowRight, ArrowUpRight, Check, Search, Sparkles, Store, Users, Buildi
 import logo from '../../assets/logo.png';
 import { useScrollProgress, prefersReducedMotion, Reveal, CountUp, useInView } from '../ui/Motion';
 import { COUNTRIES } from '../../lib/countryData';
+import { ECOSYSTEM_PRODUCTS } from '../../lib/ecosystem';
+import ProductMark from '../ui/ProductMark';
 
 const flag = (cc: string, w = 80) => `https://flagcdn.com/w${w}/${cc.toLowerCase()}.png`;
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -17,6 +19,7 @@ const ease = (t: number) => 1 - Math.pow(1 - t, 3);
 interface Segment {
   icon: typeof Store; kicker: string; title: string; desc: string; points: string[];
   bg: string; dark: boolean; visual: ReactNode; cta: { label: string; href: string; external?: boolean };
+  partners?: string[];
 }
 
 function MiniRow({ cc, a, b, c }: { cc: string; a: string; b: string; c?: string }) {
@@ -85,7 +88,7 @@ const SEGMENTS: Segment[] = [
     icon: ShoppingBag, kicker: 'Aussi pour', title: 'Restaurants & boutiques', bg: 'linear-gradient(150deg,#E11D48 0%,#4C0519 100%)', dark: true,
     desc: 'Connecté à Nutro (POS restaurant + KDS) et POS Flow : chaque vente devient une écriture, sans ressaisie.',
     points: ['Tickets → comptabilité en temps réel', 'Clôture de caisse automatique', 'Marges par produit'],
-    cta: { label: 'Découvrir Nutro', href: 'https://nutro.liafrik.com', external: true },
+    cta: { label: 'Découvrir Nutro', href: 'https://nutro.liafrik.com', external: true }, partners: ['nutro', 'posflow'],
     visual: (
       <div className="w-72 space-y-2">
         <div className="rounded-2xl bg-white p-3 shadow-2xl">
@@ -101,7 +104,7 @@ const SEGMENTS: Segment[] = [
     icon: Users, kicker: 'Aussi pour', title: 'E-commerce & startups', bg: 'linear-gradient(150deg,#7C3AED 0%,#1E1B4B 100%)', dark: true,
     desc: 'Vendez avec Sellia ou sur Zanldo, encaissez partout, et laissez LiBooks consolider ventes, frais et TVA.',
     points: ['Commandes → factures automatiques', 'Multi-devises & Mobile Money', 'Tableau de bord investisseurs'],
-    cta: { label: 'Découvrir Sellia', href: 'https://sellia.liafrik.com', external: true },
+    cta: { label: 'Découvrir Sellia', href: 'https://sellia.liafrik.com', external: true }, partners: ['sellia', 'zanldo', 'zanldo-express'],
     visual: (
       <div className="w-72 rounded-2xl bg-white p-4 shadow-2xl">
         <p className="text-xs font-semibold text-gray-800">Ventes en ligne — 7 jours</p>
@@ -122,7 +125,15 @@ function SegmentCard({ s }: { s: Segment }) {
       <span className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-white/10 blur-2xl" />
       <div className="relative flex-1 flex items-center justify-center py-4">{s.visual}</div>
       <div className="relative">
-        <p className={`text-xs font-semibold uppercase tracking-[0.22em] ${s.dark ? 'text-white/70' : 'text-[#0F2A3D]/70'}`}>{s.kicker}</p>
+        <div className="flex items-center justify-between gap-3">
+          <p className={`text-xs font-semibold uppercase tracking-[0.22em] ${s.dark ? 'text-white/70' : 'text-[#0F2A3D]/70'}`}>{s.kicker}</p>
+          {s.partners && (
+            <span className="flex items-center gap-1.5">
+              <span className={`text-[10px] ${s.dark ? 'text-white/60' : 'text-[#0F2A3D]/60'}`}>connecté à</span>
+              {s.partners.map((id) => { const p = ECOSYSTEM_PRODUCTS.find((x) => x.id === id); return p ? <ProductMark key={id} p={p} size={28} className="!rounded-lg" /> : null; })}
+            </span>
+          )}
+        </div>
         <h3 className={`mt-1 text-3xl sm:text-4xl font-semibold tracking-tight ${s.dark ? 'text-white' : 'text-[#0F2A3D]'}`}>{s.title}</h3>
         <p className={`mt-2 text-sm max-w-md ${s.dark ? 'text-white/75' : 'text-[#0F2A3D]/75'}`}>{s.desc}</p>
         <div className="mt-4 flex flex-wrap gap-2">

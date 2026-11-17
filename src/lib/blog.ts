@@ -88,7 +88,7 @@ const D = '2026-11-17T08:00:00Z';
 export const STATIC_POSTS: BlogPost[] = [
   {
     id: 's1', slug: 'ecosysteme-liafrik-tech-afrique', lang: 'fr', published: true, published_at: D,
-    title: 'L’écosystème Liafrik : 11 plateformes pour bâtir la tech africaine de référence',
+    title: 'L’écosystème Liafrik : 12 plateformes pour bâtir la tech africaine de référence',
     excerpt: 'LiBooks, Sellia, Zanldo, Nutro, POS Flow, Stella, Elora, Sukulu, Health Cloud… Découvrez l’écosystème Liafrik Tech, filiale de LIYAH GROUP.',
     category: 'Écosystème Liafrik', tags: ['Liafrik', 'LIYAH GROUP', 'tech africaine', 'Sellia', 'Zanldo'], author: 'Équipe Liafrik Tech', reading_min: 7,
     content: `## Une conviction : l’Afrique mérite des logiciels conçus pour elle
@@ -111,6 +111,7 @@ Liafrik opère avec une double présence, à Dubaï et en Afrique. Dubaï apport
 - **[Elora](https://elora.liafrik.com)** — la gestion de pressing, conçue pour le monde entier.
 - **[Sukulu](https://gosukulu.com)** — la plateforme des établissements scolaires : élèves, parents, enseignants.
 - **Health Cloud** — la gestion des hôpitaux et cliniques, très premium et à la pointe de la technologie.
+- **Atlas CRM** — le CRM qui pilote le pipeline commercial, les contacts et les relances des équipes de vente.
 - **[afrik.cloud](https://afrik.cloud)** — la vitrine gratuite des talents africains.
 
 ## Une stack moderne, souveraine et sécurisée

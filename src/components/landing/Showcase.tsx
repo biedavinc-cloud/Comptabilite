@@ -8,7 +8,9 @@ import {
 } from 'lucide-react';
 import logo from '../../assets/logo.png';
 import { prefersReducedMotion, Reveal, CountUp, useScrollProgress } from '../ui/Motion';
-import { ECOSYSTEM_PRODUCTS, LIYAH_GROUP, LIAFRIK_URL } from '../../lib/ecosystem';
+import { ECOSYSTEM_PRODUCTS, LIYAH_GROUP, LIAFRIK_URL, LIAFRIK_LOGO } from '../../lib/ecosystem';
+import ProductMark from '../ui/ProductMark';
+import { InstallAppButton } from '../ui/InstallApp';
 
 const flag = (cc: string, w = 80) => `https://flagcdn.com/w${w}/${cc}.png`;
 
@@ -304,19 +306,40 @@ export function EcosystemSection() {
           </div>
           <Reveal delay={160}>
             <a href={LIAFRIK_URL} target="_blank" rel="noopener noreferrer" className="max-w-sm block rounded-2xl border border-gray-200 dark:border-surface-3 p-5 hover:shadow-lg transition-all">
-              <p className="text-xs uppercase tracking-widest text-gray-400">Maison mère</p>
-              <p className="mt-1 font-semibold text-[#0F2A3D] dark:text-white">{LIYAH_GROUP.name}</p>
+              <div className="flex items-center gap-3">
+                <img src={LIAFRIK_LOGO} alt="Liafrik" className="w-10 h-10 rounded-xl bg-white p-1 ring-1 ring-black/5" />
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-gray-400">Maison mère</p>
+                  <p className="font-semibold text-[#0F2A3D] dark:text-white">{LIYAH_GROUP.name}</p>
+                </div>
+              </div>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{LIYAH_GROUP.description}</p>
             </a>
           </Reveal>
         </div>
+        {/* Mur de logos défilant */}
+        <div className="relative -mx-4 sm:-mx-6 mb-10 overflow-hidden py-4 border-y border-gray-100 dark:border-surface-3" aria-hidden="true">
+          <div className="absolute inset-y-0 left-0 w-24 z-10 bg-gradient-to-r from-white dark:from-surface-1 to-transparent" />
+          <div className="absolute inset-y-0 right-0 w-24 z-10 bg-gradient-to-l from-white dark:from-surface-1 to-transparent" />
+          <div className="flex w-max lb-marquee items-center gap-14" style={{ animationDuration: '38s' }}>
+            {[0, 1].map((rep) => (
+              <div key={rep} className="flex items-center gap-14">
+                <img src={LIAFRIK_LOGO} alt="" className="h-10 w-10 object-contain" />
+                {ECOSYSTEM_PRODUCTS.map((p) => p.wordmark
+                  ? <img key={p.id} src={p.wordmark} alt="" className="h-10 w-auto object-contain dark:bg-white dark:rounded-lg dark:px-2 opacity-90 hover:opacity-100 transition-opacity" />
+                  : <span key={p.id} className="flex items-center gap-2.5 text-lg font-semibold text-[#0F2A3D] dark:text-white whitespace-nowrap"><ProductMark p={p} size={36} />{p.name}</span>)}
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {ECOSYSTEM_PRODUCTS.map((p, i) => (
             <Reveal key={p.id} delay={(i % 4) * 80}>
               <a href={p.url} target="_blank" rel="noopener noreferrer" className="lb-spotlight group relative flex flex-col h-full rounded-3xl border border-gray-100 dark:border-surface-3 bg-white dark:bg-surface-1 p-6 overflow-hidden hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-500">
                 <span className="absolute -right-10 -top-10 w-32 h-32 rounded-full opacity-10 group-hover:opacity-25 group-hover:scale-125 transition-all duration-700" style={{ background: p.color }} />
                 <div className="flex items-center justify-between">
-                  <span className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg" style={{ background: p.color }}>{p.name.charAt(0).toUpperCase()}</span>
+                  <span className="transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3"><ProductMark p={p} size={52} /></span>
                   <ArrowUpRight className="w-5 h-5 text-gray-300 group-hover:text-[#0057D9] group-hover:rotate-45 transition-all duration-500" />
                 </div>
                 <p className="mt-5 text-lg font-semibold text-[#0F2A3D] dark:text-white">{p.name}</p>
@@ -367,3 +390,58 @@ export function FooterWatermark({ children }: { children?: ReactNode }) {
   );
 }
 
+
+/* ------------------------------------------------------------------ */
+/* 10. Application mobile & ordinateur (PWA installable)               */
+/* ------------------------------------------------------------------ */
+export function MobileAppSection() {
+  return (
+    <section className="relative overflow-hidden py-24 bg-gray-50 dark:bg-surface-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-14 items-center">
+        <div>
+          <Reveal><p className="text-xs uppercase tracking-[0.3em] text-[#0057D9] mb-3 flex items-center gap-3"><span className="w-8 h-px bg-[#0057D9]" /> Application</p></Reveal>
+          <Reveal delay={80}><h2 className="text-4xl sm:text-6xl font-semibold tracking-tight text-[#0F2A3D] dark:text-white">Votre comptabilité <span className="font-light">dans la poche.</span></h2></Reveal>
+          <Reveal delay={160}><p className="mt-5 text-lg text-gray-500 dark:text-gray-400 max-w-lg">Installez LiBooks sur Android, iPhone, Windows ou Mac en un clic : icône sur l’écran d’accueil, plein écran, raccourcis « Nouvelle facture », et fonctionnement hors connexion.</p></Reveal>
+          <Reveal delay={220}>
+            <ul className="mt-6 grid sm:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300">
+              {['Moins de 3 Mo, sans store', 'Hors ligne, synchro auto', 'Mises à jour instantanées', 'Même compte partout'].map((t) => (
+                <li key={t} className="flex items-center gap-2"><span className="w-5 h-5 rounded-full bg-[#0057D9] flex items-center justify-center"><Check className="w-3 h-3 text-white" /></span>{t}</li>
+              ))}
+            </ul>
+          </Reveal>
+          <Reveal delay={280}>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <InstallAppButton className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#0F2A3D] dark:bg-white dark:text-[#0F2A3D] text-white font-semibold shadow-xl hover:scale-105 transition-transform" label="Installer LiBooks" />
+              <span className="text-xs text-gray-400">Android · iPhone · Windows · macOS</span>
+            </div>
+          </Reveal>
+        </div>
+        <Reveal variant="right" duration={1100}>
+          <div className="relative mx-auto w-[300px] h-[600px]">
+            <div className="absolute -inset-10 rounded-full bg-[#0057D9]/20 blur-3xl" />
+            <div className="relative w-full h-full rounded-[3rem] bg-[#0F2A3D] p-3 shadow-2xl ring-1 ring-black/10 lb-float-slow">
+              <div className="absolute top-5 left-1/2 -translate-x-1/2 w-24 h-6 rounded-full bg-black z-10" />
+              <div className="w-full h-full rounded-[2.4rem] overflow-hidden bg-gray-50 flex flex-col">
+                <div className="px-5 pt-12 pb-5 text-white" style={{ background: 'linear-gradient(140deg,#0057D9,#0F2A3D)' }}>
+                  <div className="flex items-center gap-2"><img src={logo} alt="" className="w-7 h-7 rounded-lg bg-white p-0.5" /><span className="font-semibold">LiBooks</span></div>
+                  <p className="mt-4 text-xs text-white/70">Chiffre d’affaires du mois</p>
+                  <p className="text-2xl font-semibold tabular-nums">XAF 12 480 000</p>
+                  <p className="text-[11px] text-emerald-300 mt-1">↑ 18 % vs mois dernier</p>
+                </div>
+                <div className="p-4 space-y-2.5 flex-1">
+                  {[['FAC-0412', 'Boutique Akwaba', '450 000', 'Payée', 'bg-emerald-100 text-emerald-700'], ['FAC-0413', 'Bakery Bonapriso', '180 000', 'Envoyée', 'bg-blue-100 text-blue-700'], ['FAC-0414', 'Studio Teranga', '95 000', 'Brouillon', 'bg-gray-100 text-gray-600']].map(([n, c, a, st, cls]) => (
+                    <div key={n} className="rounded-2xl bg-white p-3 shadow-sm flex items-center justify-between">
+                      <div><p className="text-xs font-semibold text-gray-900">{c}</p><p className="text-[10px] text-gray-400">{n}</p></div>
+                      <div className="text-right"><p className="text-xs font-semibold text-gray-900">{a}</p><span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${cls}`}>{st}</span></div>
+                    </div>
+                  ))}
+                  <div className="rounded-2xl bg-[#0057D9] text-white p-3 text-center text-sm font-semibold shadow-lg">+ Nouvelle facture</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}

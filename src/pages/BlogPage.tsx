@@ -8,7 +8,8 @@ import ThemeToggle from '../components/ui/ThemeToggle';
 import { usePageMeta } from '../lib/usePageMeta';
 import { supabase } from '../lib/supabase';
 import { BlogPost, STATIC_POSTS, renderContent } from '../lib/blog';
-import { ECOSYSTEM_PRODUCTS, LIYAH_GROUP } from '../lib/ecosystem';
+import { ECOSYSTEM_PRODUCTS, LIYAH_GROUP, LIAFRIK_LOGO } from '../lib/ecosystem';
+import ProductMark from '../components/ui/ProductMark';
 import { Reveal } from '../components/ui/Motion';
 
 function usePosts(lang: 'fr' | 'en') {
@@ -168,13 +169,13 @@ function Ecosystem({ isEn }: { isEn: boolean }) {
       <div className="absolute -right-16 -bottom-16 w-72 h-72 rounded-full bg-[#0057D9]/40 blur-3xl" />
       <div className="relative">
         <p className="text-xs uppercase tracking-[0.25em] text-white/60">{isEn ? 'The ecosystem' : 'L’écosystème'}</p>
-        <h2 className="mt-2 text-2xl sm:text-3xl font-semibold">Liafrik Tech</h2>
+        <h2 className="mt-2 text-2xl sm:text-3xl font-semibold flex items-center gap-3"><img src={LIAFRIK_LOGO} alt="" className="w-10 h-10 rounded-xl bg-white p-1" /> Liafrik Tech</h2>
         <p className="mt-2 text-sm text-white/60 max-w-2xl">{isEn ? 'A subsidiary of' : 'Filiale de'} {LIYAH_GROUP.name} — {LIYAH_GROUP.description}</p>
         <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {ECOSYSTEM_PRODUCTS.map((e) => (
             <a key={e.id} href={e.url} target="_blank" rel="noopener noreferrer" className="group rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 p-5 transition-all hover:-translate-y-0.5">
               <div className="flex items-center gap-3">
-                <span className="w-9 h-9 rounded-xl flex items-center justify-center font-bold" style={{ background: e.color }}>{e.name.charAt(0).toUpperCase()}</span>
+                <ProductMark p={e} size={40} />
                 <div className="min-w-0">
                   <p className="font-semibold flex items-center gap-1.5">{e.name} <ExternalLink className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100" /></p>
                   <p className="text-[11px] text-white/50 truncate">{e.linkable ? e.domain : e.category}</p>

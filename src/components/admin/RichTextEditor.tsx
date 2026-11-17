@@ -6,6 +6,7 @@ import {
 import { sanitizeEditorHtml } from '../../lib/blog';
 import { supabase } from '../../lib/supabase';
 import { ECOSYSTEM_PRODUCTS } from '../../lib/ecosystem';
+import ProductMark from '../ui/ProductMark';
 import toast from 'react-hot-toast';
 
 // Éditeur riche du CMS (contentEditable, zéro dépendance) :
@@ -204,7 +205,7 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Commenc
               {ECOSYSTEM_PRODUCTS.map((p) => (
                 <button key={p.id} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => insertProductLink(p.url, p.name)}
                   className="w-full flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-surface-2 text-left">
-                  <span className="w-6 h-6 rounded-md text-white text-[11px] font-bold flex items-center justify-center" style={{ background: p.color }}>{p.name.charAt(0).toUpperCase()}</span>
+                  <ProductMark p={p} size={28} />
                   <span className="flex-1 min-w-0"><span className="block text-sm text-gray-900 dark:text-white">{p.name}</span><span className="block text-[11px] text-gray-400 truncate">{p.domain}</span></span>
                 </button>
               ))}
