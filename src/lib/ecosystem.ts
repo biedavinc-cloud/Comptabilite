@@ -13,6 +13,7 @@ import eloraLogo from '../assets/ecosystem/elora.png';
 import healthLogo from '../assets/ecosystem/healthcloud.png';
 import healthWord from '../assets/ecosystem/healthcloud-wordmark.png';
 import atlasLogo from '../assets/ecosystem/atlas.png';
+import sukuluLogo from '../assets/ecosystem/sukulu.png';
 
 export const LIAFRIK_LOGO = liafrikLogo;
 export const LIAFRIK_URL = 'https://liafrik.com';
@@ -84,8 +85,8 @@ export const ECOSYSTEM_PRODUCTS: EcosystemProduct[] = [
     description: 'Dépôts, tickets, suivi des articles, livraison et fidélité — une plateforme pressing pensée pour le monde entier.',
   },
   {
-    id: 'sukulu', name: 'Sukulu', url: 'https://gosukulu.com', domain: 'gosukulu.com', linkable: true,
-    category: 'Éducation', color: '#16A34A',
+    id: 'sukulu', logo: sukuluLogo, name: 'Sukulu', url: 'https://gosukulu.com', domain: 'gosukulu.com', linkable: true,
+    category: 'Éducation', color: '#0891A6',
     tagline: 'La plateforme des établissements scolaires',
     description: 'Élèves, parents, enseignants, notes, frais de scolarité et communication — tout l’établissement réuni.',
   },

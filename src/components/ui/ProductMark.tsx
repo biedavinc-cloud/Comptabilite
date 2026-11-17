@@ -5,7 +5,7 @@ export default function ProductMark({ p, size = 44, className = '' }: { p: Pick<
   if (p.logo) {
     return (
       <span className={`inline-flex items-center justify-center rounded-2xl bg-white ring-1 ring-black/5 shadow-sm flex-shrink-0 overflow-hidden ${className}`} style={{ width: size, height: size }}>
-        <img src={p.logo} alt={p.name} loading="lazy" className="w-[78%] h-[78%] object-contain" />
+        <img src={p.logo} alt={p.name} loading="lazy" className="w-[88%] h-[88%] object-contain drop-shadow-[0_1px_0_rgba(0,0,0,0.04)]" />
       </span>
     );
   }

@@ -339,7 +339,7 @@ export function EcosystemSection() {
               <a href={p.url} target="_blank" rel="noopener noreferrer" className="lb-spotlight group relative flex flex-col h-full rounded-3xl border border-gray-100 dark:border-surface-3 bg-white dark:bg-surface-1 p-6 overflow-hidden hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-500">
                 <span className="absolute -right-10 -top-10 w-32 h-32 rounded-full opacity-10 group-hover:opacity-25 group-hover:scale-125 transition-all duration-700" style={{ background: p.color }} />
                 <div className="flex items-center justify-between">
-                  <span className="transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3"><ProductMark p={p} size={52} /></span>
+                  <span className="transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3"><ProductMark p={p} size={64} /></span>
                   <ArrowUpRight className="w-5 h-5 text-gray-300 group-hover:text-[#0057D9] group-hover:rotate-45 transition-all duration-500" />
                 </div>
                 <p className="mt-5 text-lg font-semibold text-[#0F2A3D] dark:text-white">{p.name}</p>
