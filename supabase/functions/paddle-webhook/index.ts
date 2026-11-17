@@ -19,6 +19,7 @@
 // checkout was opened.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
+import { getSecret } from "../_shared/integrations.ts";
 
 async function logFunctionError(functionName: string, error: unknown, context: Record<string, unknown> = {}) {
   try {
@@ -49,7 +50,7 @@ async function hmacSha256Hex(secret: string, message: string): Promise<string> {
 
 Deno.serve(async (req: Request) => {
   try {
-    const secret = Deno.env.get("PADDLE_WEBHOOK_SECRET");
+    const secret = (await getSecret("paddle", "webhook_secret", "PADDLE_WEBHOOK_SECRET"));
     if (!secret) throw new Error("PADDLE_WEBHOOK_SECRET is not configured");
 
     const rawBody = await req.text();

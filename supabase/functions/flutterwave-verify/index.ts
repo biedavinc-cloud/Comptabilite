@@ -9,6 +9,7 @@
 // Requires the Edge Function secret: FLUTTERWAVE_SECRET_KEY
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
+import { getSecret } from "../_shared/integrations.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -56,7 +57,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 200, headers: corsHeaders });
 
   try {
-    const secretKey = Deno.env.get("FLUTTERWAVE_SECRET_KEY");
+    const secretKey = (await getSecret("flutterwave", "secret_key", "FLUTTERWAVE_SECRET_KEY"));
     if (!secretKey) throw new Error("FLUTTERWAVE_SECRET_KEY is not configured");
 
     const authHeader = req.headers.get("Authorization") ?? "";
@@ -120,6 +121,18 @@ Deno.serve(async (req: Request) => {
     // have a card object/token: those stay manual-renewal + reminder
     // email, since MoMo requires the customer's live phone authorization
     // for every charge by design — there's no silent-recharge option.
+    // Replay guard: the same Flutterwave tx_ref must only ever activate /
+    // extend a subscription once (verify and webhook both race for it).
+    // flutterwave_processed_tx_ref is set atomically by the first caller.
+    const { data: claimedFw } = await serviceClient.from("tenants")
+      .update({ flutterwave_processed_tx_ref: verified.data.tx_ref })
+      .eq("id", tenant_id)
+      .or(`flutterwave_processed_tx_ref.is.null,flutterwave_processed_tx_ref.neq.${verified.data.tx_ref}`)
+      .select("id");
+    if (!claimedFw || claimedFw.length === 0) {
+      return new Response(JSON.stringify({ success: true, plan: meta.plan, already_processed: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const cardToken = verified.data.card?.token as string | undefined;
     const cycleDays = cycle === "annual" ? 365 : 30;
 

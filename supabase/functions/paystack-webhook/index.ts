@@ -10,6 +10,7 @@
 // anything, same discipline as every other payment path here.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
+import { getSecret } from "../_shared/integrations.ts";
 
 async function logFunctionError(functionName: string, error: unknown, context: Record<string, unknown> = {}) {
   try {
@@ -40,7 +41,7 @@ async function hmacSha512Hex(secret: string, message: string): Promise<string> {
 
 Deno.serve(async (req: Request) => {
   try {
-    const secretKey = Deno.env.get("PAYSTACK_SECRET_KEY");
+    const secretKey = (await getSecret("paystack", "secret_key", "PAYSTACK_SECRET_KEY"));
     if (!secretKey) throw new Error("PAYSTACK_SECRET_KEY is not configured");
 
     const rawBody = await req.text();
@@ -101,7 +102,13 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ received: true, action: "amount_mismatch" }), { status: 200, headers: { "Content-Type": "application/json" } });
     }
 
-    await serviceClient.from("paystack_transactions").update({ status: "success", confirmed_at: new Date().toISOString() }).eq("reference", reference);
+    // Atomic claim — races with paystack-verify; only the first one extends.
+    const { data: claimed } = await serviceClient.from("paystack_transactions")
+      .update({ status: "success", confirmed_at: new Date().toISOString() })
+      .eq("reference", reference).neq("status", "success").select("reference");
+    if (!claimed || claimed.length === 0) {
+      return new Response(JSON.stringify({ received: true, action: "already_processed" }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }
     const cycleDays = txRow.cycle === "annual" ? 365 : 30;
     await serviceClient.from("tenants").update({
       plan: txRow.plan,

@@ -9,6 +9,7 @@ import { SalesInvoice, SalesInvoiceItem } from '../../types';
 import { format } from 'date-fns';
 import Badge from '../../components/ui/Badge';
 import toast from 'react-hot-toast';
+import { resolveInvoiceSettings, LOGO_HEIGHT } from '../../lib/invoiceSettings';
 
 export default function InvoiceDetail() {
   const { t } = useTranslation();
@@ -163,6 +164,7 @@ export default function InvoiceDetail() {
     cancelled: { variant: 'gray', label: t('invoiceDetail.statusCancelled') },
   };
   const st = statusMap[invoice.status] || { variant: 'gray' as const, label: invoice.status };
+  const cfg = resolveInvoiceSettings(tenant?.invoice_settings);
 
   return (
     <div className="p-4 sm:p-6 max-w-4xl mx-auto">
@@ -201,24 +203,26 @@ export default function InvoiceDetail() {
       </div>
 
       {/* Invoice document */}
-      <div id="invoice-print" className="bg-white rounded-2xl border border-gray-100 p-8 print:rounded-none print:border-0 print:shadow-none">
+      <div id="invoice-print" className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-8 print:rounded-none print:border-0 print:shadow-none overflow-x-auto relative" style={{ ['--inv-p' as string]: cfg.primary_color, ['--inv-a' as string]: cfg.accent_color }}>
+        {cfg.template === 'modern' && <div className="absolute inset-x-0 top-0 h-2 rounded-t-2xl print:rounded-none" style={{ background: cfg.accent_color }} />}
         {/* Company header */}
-        <div className="flex justify-between items-start mb-8">
+        <div className={`flex flex-col sm:flex-row justify-between items-start gap-6 mb-8 ${cfg.template === 'modern' ? '-mx-5 sm:-mx-8 -mt-5 sm:-mt-8 px-5 sm:px-8 py-6 rounded-t-2xl text-white' : ''}`} style={cfg.template === 'modern' ? { background: cfg.primary_color } : {}}>
           <div>
-            {tenant?.logo_url && (
-              <img src={tenant.logo_url} alt="Logo" className="h-16 object-contain mb-3" />
+            {cfg.show_logo && tenant?.logo_url && (
+              <img src={tenant.logo_url} alt="Logo" className="object-contain mb-3" style={{ height: LOGO_HEIGHT[cfg.logo_size] * 1.25 }} />
             )}
-            <h1 className="text-2xl font-bold text-[#0F2A3D]">{tenant?.name}</h1>
+            <h1 className="text-2xl font-bold" style={{ color: cfg.template === 'modern' ? '#fff' : cfg.primary_color }}>{tenant?.name}</h1>
+            {[cfg.address, cfg.phone, cfg.email, cfg.website].filter(Boolean).map((c) => <p key={c} className={`text-sm ${cfg.template === 'modern' ? 'text-white/80' : 'text-gray-500'}`}>{c}</p>)}
             {tenant?.legal_nif && <p className="text-sm text-gray-500">NIF: {tenant.legal_nif}</p>}
             {tenant?.legal_rccm && <p className="text-sm text-gray-500">RCCM: {tenant.legal_rccm}</p>}
             {tenant?.legal_regime && <p className="text-sm text-gray-500">Régime: {tenant.legal_regime}</p>}
           </div>
           <div className="text-right">
             <div className="flex items-center justify-end gap-2 mb-2">
-              <h2 className="text-3xl font-medium text-[#0F2A3D]">{t('invoiceDetail.invoiceTitle')}</h2>
+              <h2 className="text-3xl font-medium" style={{ color: cfg.template === 'modern' ? '#fff' : cfg.primary_color }}>{cfg.title || t('invoiceDetail.invoiceTitle')}</h2>
               <Badge variant={st.variant}>{st.label}</Badge>
             </div>
-            <p className="text-xl font-mono font-semibold text-[#0057D9]">{invoice.invoice_number}</p>
+            <p className="text-xl font-mono font-semibold" style={{ color: cfg.template === 'modern' ? '#fff' : cfg.accent_color }}>{invoice.invoice_number}</p>
             <p className="text-sm text-gray-500 mt-1">{t('invoiceDetail.invoiceDate')}: {format(new Date(invoice.invoice_date), 'dd/MM/yyyy')}</p>
             {invoice.due_date && (
               <p className="text-sm text-gray-500">{t('invoiceDetail.dueDate')}: {format(new Date(invoice.due_date), 'dd/MM/yyyy')}</p>
@@ -245,14 +249,14 @@ export default function InvoiceDetail() {
         <div className="mb-8">
           <table className="w-full">
             <thead>
-              <tr className="border-b-2 border-[#0F2A3D]">
-                <th className="text-left py-2 text-sm font-semibold text-[#0F2A3D]">{t('invoiceDetail.colDescription')}</th>
-                <th className="text-right py-2 text-sm font-semibold text-[#0F2A3D]">{t('invoiceDetail.colQty')}</th>
-                <th className="text-right py-2 text-sm font-semibold text-[#0F2A3D]">{t('invoiceDetail.colUnitPrice')}</th>
-                <th className="text-right py-2 text-sm font-semibold text-[#0F2A3D]">{t('invoiceDetail.colDiscount')}</th>
-                <th className="text-right py-2 text-sm font-semibold text-[#0F2A3D]">{t('invoiceDetail.colVat')}</th>
-                <th className="text-right py-2 text-sm font-semibold text-[#0F2A3D]">{t('invoiceDetail.colTotalHt')}</th>
-                <th className="text-right py-2 text-sm font-semibold text-[#0F2A3D]">{t('invoiceDetail.colTotalTtc')}</th>
+              <tr className="border-b-2" style={{ borderColor: cfg.primary_color }}>
+                <th className="text-left py-2 text-sm font-semibold" style={{ color: cfg.primary_color }}>{t('invoiceDetail.colDescription')}</th>
+                <th className="text-right py-2 text-sm font-semibold" style={{ color: cfg.primary_color }}>{t('invoiceDetail.colQty')}</th>
+                <th className="text-right py-2 text-sm font-semibold" style={{ color: cfg.primary_color }}>{t('invoiceDetail.colUnitPrice')}</th>
+                <th className="text-right py-2 text-sm font-semibold" style={{ color: cfg.primary_color }}>{t('invoiceDetail.colDiscount')}</th>
+                <th className="text-right py-2 text-sm font-semibold" style={{ color: cfg.primary_color }}>{t('invoiceDetail.colVat')}</th>
+                <th className="text-right py-2 text-sm font-semibold" style={{ color: cfg.primary_color }}>{t('invoiceDetail.colTotalHt')}</th>
+                <th className="text-right py-2 text-sm font-semibold" style={{ color: cfg.primary_color }}>{t('invoiceDetail.colTotalTtc')}</th>
               </tr>
             </thead>
             <tbody>
@@ -289,6 +293,12 @@ export default function InvoiceDetail() {
                 <p className="text-sm text-gray-600">{invoice.terms}</p>
               </div>
             )}
+            {cfg.payment_instructions && (
+              <div className="mt-4">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Modalités de paiement</p>
+                <p className="text-sm text-gray-600 whitespace-pre-line">{cfg.payment_instructions}</p>
+              </div>
+            )}
             {(tenant?.bank_details as Record<string, string>)?.iban && (
               <div className="mt-4">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{t('invoiceDetail.bankDetails')}</p>
@@ -312,9 +322,9 @@ export default function InvoiceDetail() {
               <span className="text-gray-500">{t('invoiceDetail.vatLabel')}</span>
               <span className="font-medium">{formatCurrency(invoice.vat_amount)}</span>
             </div>
-            <div className="flex justify-between font-medium text-lg border-t-2 border-[#0F2A3D] pt-2">
-              <span className="text-[#0F2A3D]">{t('invoiceDetail.totalTtc')}</span>
-              <span className="text-[#0057D9]">{formatCurrency(invoice.total)}</span>
+            <div className="flex justify-between font-medium text-lg border-t-2 pt-2" style={{ borderColor: cfg.primary_color }}>
+              <span style={{ color: cfg.primary_color }}>{t('invoiceDetail.totalTtc')}</span>
+              <span style={{ color: cfg.accent_color }}>{formatCurrency(invoice.total)}</span>
             </div>
             {invoice.amount_paid > 0 && (
               <>
@@ -334,10 +344,10 @@ export default function InvoiceDetail() {
         </div>
 
         {/* Official stamp */}
-        {tenant?.cachet_url && (
+        {cfg.show_stamp && tenant?.cachet_url && (
           <div className="mt-8 flex justify-end">
             <div className="text-center">
-              <p className="text-xs text-gray-400 mb-1">{t('invoiceDetail.officialStamp')}</p>
+              <p className="text-xs text-gray-400 mb-1">{cfg.signature_label || t('invoiceDetail.officialStamp')}</p>
               <img src={tenant.cachet_url} alt="Cachet" className="h-24 object-contain" />
             </div>
           </div>
@@ -345,7 +355,7 @@ export default function InvoiceDetail() {
 
         {/* Footer */}
         <div className="mt-12 pt-4 border-t border-gray-200 text-center text-xs text-gray-400">
-          {tenant?.name} · {tenant?.legal_nif ? `NIF: ${tenant.legal_nif} · ` : ''}{tenant?.city || ''} · {tenant?.phone_prefix}
+          {cfg.footer_text || <>{tenant?.name} · {tenant?.legal_nif ? `NIF: ${tenant.legal_nif} · ` : ''}{tenant?.city || ''} · {tenant?.phone_prefix}</>}
         </div>
       </div>
     </div>

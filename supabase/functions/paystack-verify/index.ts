@@ -7,6 +7,7 @@
 // before this fires.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
+import { getSecret } from "../_shared/integrations.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -35,7 +36,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 200, headers: corsHeaders });
 
   try {
-    const secretKey = Deno.env.get("PAYSTACK_SECRET_KEY");
+    const secretKey = (await getSecret("paystack", "secret_key", "PAYSTACK_SECRET_KEY"));
     if (!secretKey) throw new Error("PAYSTACK_SECRET_KEY is not configured");
 
     const authHeader = req.headers.get("Authorization") ?? "";
@@ -91,7 +92,17 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Le montant du paiement ne correspond pas au forfait sélectionné. Contacte le support." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    await serviceClient.from("paystack_transactions").update({ status: "success", confirmed_at: new Date().toISOString() }).eq("reference", reference);
+    // Atomic claim: only the FIRST caller (this function or paystack-webhook)
+    // that flips the row from non-success to success gets to extend the
+    // subscription. Without this guard, replaying an old successful
+    // reference re-ran the update below and pushed next_billing_date
+    // forward again for free — an unlimited free-renewal exploit.
+    const { data: claimed } = await serviceClient.from("paystack_transactions")
+      .update({ status: "success", confirmed_at: new Date().toISOString() })
+      .eq("reference", reference).neq("status", "success").select("reference");
+    if (!claimed || claimed.length === 0) {
+      return new Response(JSON.stringify({ success: true, plan: txRow.plan, already_processed: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     // Bug fixed here: this never set next_billing_date at all, so a
     // single Paystack payment granted access with no expiry, ever — same
     // class of revenue-leak bug as PayUnit had. No stored reusable

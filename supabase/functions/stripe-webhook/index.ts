@@ -16,6 +16,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
 import Stripe from "npm:stripe@17";
+import { getSecret } from "../_shared/integrations.ts";
 
 async function logFunctionError(functionName, error, context = {}) {
   try {
@@ -33,8 +34,8 @@ async function logFunctionError(functionName, error, context = {}) {
 }
 
 Deno.serve(async (req: Request) => {
-  const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-  const signingSecret = Deno.env.get("STRIPE_WEBHOOK_SIGNING_SECRET");
+  const stripeKey = (await getSecret("stripe", "secret_key", "STRIPE_SECRET_KEY"));
+  const signingSecret = (await getSecret("stripe", "webhook_secret", "STRIPE_WEBHOOK_SIGNING_SECRET"));
   if (!stripeKey || !signingSecret) {
     return new Response("Webhook not configured", { status: 500 });
   }

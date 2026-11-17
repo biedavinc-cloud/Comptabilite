@@ -11,6 +11,7 @@
 //   database (visible in Super Admin) — nothing is lost, email is just
 //   not sent yet.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { getSecret } from "../_shared/integrations.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -73,7 +74,7 @@ Deno.serve(async (req: Request) => {
 
     // 2. Best-effort email notification. Doesn't fail the request if it
     //    doesn't work — the message is already safely saved above.
-    const resendKey = Deno.env.get("RESEND_API_KEY");
+    const resendKey = (await getSecret("resend", "api_key", "RESEND_API_KEY"));
     if (resendKey) {
       try {
         const emailRes = await fetch("https://api.resend.com/emails", {

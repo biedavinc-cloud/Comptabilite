@@ -13,6 +13,7 @@
 // to email an arbitrary PDF to an arbitrary address under LiBooks' name.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
+import { getSecret } from "../_shared/integrations.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -65,7 +66,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: tenant } = await serviceClient.from("tenants").select("name").eq("id", invoice.tenant_id).maybeSingle();
 
-    const resendKey = Deno.env.get("RESEND_API_KEY");
+    const resendKey = (await getSecret("resend", "api_key", "RESEND_API_KEY"));
     if (!resendKey) {
       return new Response(JSON.stringify({ error: "L'envoi d'email n'est pas encore configuré (RESEND_API_KEY manquant côté serveur)." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }

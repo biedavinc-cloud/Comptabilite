@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import { usePageMeta } from '../../lib/usePageMeta';
 
 export default function SignupPage() {
-  usePageMeta('Créer un compte', "Démarre ton essai gratuit de 7 jours sur LiBooks — sans carte bancaire.");
+  usePageMeta('Créer un compte', "Démarre ton essai gratuit de 30 jours sur LiBooks — sans carte bancaire.");
   const { t, i18n } = useTranslation();
   const isEn = i18n.language === 'en';
   const { signUp } = useAuth();
@@ -66,14 +66,14 @@ export default function SignupPage() {
     'Offline-first POS',
     '97 countries supported worldwide',
     'PDF/WhatsApp exports',
-    '7-day free trial, no card required',
+    '30-day free trial, no card required',
   ] : [
     'Facturation SYSCOHADA automatique',
     'Gestion de stock multi-magasin',
     'POS offline-first',
     '97 pays supportés dans le monde',
     'Exports PDF/WhatsApp',
-    '7 jours d\'essai gratuit, sans CB',
+    '30 jours d\'essai gratuit, sans CB',
   ];
 
   return (
@@ -94,7 +94,7 @@ export default function SignupPage() {
             <span className="text-[#0057D9]">sans carte bancaire.</span>
           </h2>
           <p className="text-slate-300 mb-8">
-            Accès complet pendant 7 jours. Aucune configuration complexe.
+            Accès complet pendant 30 jours. Aucune configuration complexe.
           </p>
 
           <div className="space-y-3">
