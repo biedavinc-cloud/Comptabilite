@@ -1,5 +1,6 @@
-import { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { Suspense, useEffect } from 'react';
+import { lazyWithRetry } from './lib/lazyWithRetry';
+import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import i18n from './i18n';
 import { useAuth } from './contexts/AuthContext';
 import { useTenant } from './contexts/TenantContext';
@@ -14,53 +15,53 @@ import LogoLoader from './components/ui/LogoLoader';
 // this is the single biggest lever for initial load speed. AppLayout,
 // PremiumGate and the INVITE_STORAGE_KEY constant stay eager since
 // they're small and needed immediately for routing/layout decisions.
-const LandingPage = lazy(() => import('./pages/LandingPage'));
-const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
-const SignupPage = lazy(() => import('./pages/auth/SignupPage'));
-const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'));
-const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
-const VerifyEmailPage = lazy(() => import('./pages/auth/VerifyEmailPage'));
-const AcceptInvitePage = lazy(() => import('./pages/auth/AcceptInvitePage'));
-const OnboardingPage = lazy(() => import('./pages/onboarding/OnboardingPage'));
-const Dashboard = lazy(() => import('./pages/app/Dashboard'));
-const ChartOfAccounts = lazy(() => import('./pages/app/ChartOfAccounts'));
-const Inventory = lazy(() => import('./pages/app/Inventory'));
-const Warehouses = lazy(() => import('./pages/app/Warehouses'));
-const Customers = lazy(() => import('./pages/app/Customers'));
-const Suppliers = lazy(() => import('./pages/app/Suppliers'));
-const SalesInvoices = lazy(() => import('./pages/app/SalesInvoices'));
-const RecurringInvoices = lazy(() => import('./pages/app/RecurringInvoices'));
-const InvoiceDetail = lazy(() => import('./pages/app/InvoiceDetail'));
-const PurchaseInvoices = lazy(() => import('./pages/app/PurchaseInvoices'));
-const Transactions = lazy(() => import('./pages/app/Transactions'));
-const Reports = lazy(() => import('./pages/app/Reports'));
-const Ledger = lazy(() => import('./pages/app/Ledger'));
-const BankReconciliation = lazy(() => import('./pages/app/BankReconciliation'));
-const CreditNotes = lazy(() => import('./pages/app/CreditNotes'));
-const FixedAssets = lazy(() => import('./pages/app/FixedAssets'));
-const Settings = lazy(() => import('./pages/app/Settings'));
-const UsersRoles = lazy(() => import('./pages/app/UsersRoles'));
-const Billing = lazy(() => import('./pages/app/Billing'));
-const Banking = lazy(() => import('./pages/app/Banking'));
-const WhatsApp = lazy(() => import('./pages/app/WhatsApp'));
-const AICashflow = lazy(() => import('./pages/app/AICashflow'));
-const Ohada = lazy(() => import('./pages/app/Ohada'));
-const SuperAdmin = lazy(() => import('./pages/app/SuperAdmin'));
-const PlanSelectionGate = lazy(() => import('./pages/app/PlanSelectionGate'));
-const AboutPage = lazy(() => import('./pages/footer/AboutPage'));
-const ContactPage = lazy(() => import('./pages/footer/ContactPage'));
-const LegalPage = lazy(() => import('./pages/footer/LegalPage'));
-const ApiDocsPage = lazy(() => import('./pages/ApiDocsPage'));
-const HelpCenterPage = lazy(() => import('./pages/HelpCenterPage'));
-const PrivacyPage = lazy(() => import('./pages/footer/PrivacyPage'));
-const TermsPage = lazy(() => import('./pages/footer/TermsPage'));
-const CookiePolicyPage = lazy(() => import('./pages/footer/CookiePolicyPage'));
-const RefundPolicyPage = lazy(() => import('./pages/footer/RefundPolicyPage'));
-const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
-const SecurityPage = lazy(() => import('./pages/TrustPage').then(m => ({ default: m.SecurityPage })));
-const StatusPage = lazy(() => import('./pages/TrustPage').then(m => ({ default: m.StatusPage })));
-const BlogIndexPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogIndexPage })));
-const BlogPostPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogPostPage })));
+const LandingPage = lazyWithRetry(() => import('./pages/LandingPage'));
+const LoginPage = lazyWithRetry(() => import('./pages/auth/LoginPage'));
+const SignupPage = lazyWithRetry(() => import('./pages/auth/SignupPage'));
+const ForgotPasswordPage = lazyWithRetry(() => import('./pages/auth/ForgotPasswordPage'));
+const ResetPasswordPage = lazyWithRetry(() => import('./pages/auth/ResetPasswordPage'));
+const VerifyEmailPage = lazyWithRetry(() => import('./pages/auth/VerifyEmailPage'));
+const AcceptInvitePage = lazyWithRetry(() => import('./pages/auth/AcceptInvitePage'));
+const OnboardingPage = lazyWithRetry(() => import('./pages/onboarding/OnboardingPage'));
+const Dashboard = lazyWithRetry(() => import('./pages/app/Dashboard'));
+const ChartOfAccounts = lazyWithRetry(() => import('./pages/app/ChartOfAccounts'));
+const Inventory = lazyWithRetry(() => import('./pages/app/Inventory'));
+const Warehouses = lazyWithRetry(() => import('./pages/app/Warehouses'));
+const Customers = lazyWithRetry(() => import('./pages/app/Customers'));
+const Suppliers = lazyWithRetry(() => import('./pages/app/Suppliers'));
+const SalesInvoices = lazyWithRetry(() => import('./pages/app/SalesInvoices'));
+const RecurringInvoices = lazyWithRetry(() => import('./pages/app/RecurringInvoices'));
+const InvoiceDetail = lazyWithRetry(() => import('./pages/app/InvoiceDetail'));
+const PurchaseInvoices = lazyWithRetry(() => import('./pages/app/PurchaseInvoices'));
+const Transactions = lazyWithRetry(() => import('./pages/app/Transactions'));
+const Reports = lazyWithRetry(() => import('./pages/app/Reports'));
+const Ledger = lazyWithRetry(() => import('./pages/app/Ledger'));
+const BankReconciliation = lazyWithRetry(() => import('./pages/app/BankReconciliation'));
+const CreditNotes = lazyWithRetry(() => import('./pages/app/CreditNotes'));
+const FixedAssets = lazyWithRetry(() => import('./pages/app/FixedAssets'));
+const Settings = lazyWithRetry(() => import('./pages/app/Settings'));
+const UsersRoles = lazyWithRetry(() => import('./pages/app/UsersRoles'));
+const Billing = lazyWithRetry(() => import('./pages/app/Billing'));
+const Banking = lazyWithRetry(() => import('./pages/app/Banking'));
+const WhatsApp = lazyWithRetry(() => import('./pages/app/WhatsApp'));
+const AICashflow = lazyWithRetry(() => import('./pages/app/AICashflow'));
+const Ohada = lazyWithRetry(() => import('./pages/app/Ohada'));
+const SuperAdmin = lazyWithRetry(() => import('./pages/app/SuperAdmin'));
+const PlanSelectionGate = lazyWithRetry(() => import('./pages/app/PlanSelectionGate'));
+const AboutPage = lazyWithRetry(() => import('./pages/footer/AboutPage'));
+const ContactPage = lazyWithRetry(() => import('./pages/footer/ContactPage'));
+const LegalPage = lazyWithRetry(() => import('./pages/footer/LegalPage'));
+const ApiDocsPage = lazyWithRetry(() => import('./pages/ApiDocsPage'));
+const HelpCenterPage = lazyWithRetry(() => import('./pages/HelpCenterPage'));
+const PrivacyPage = lazyWithRetry(() => import('./pages/footer/PrivacyPage'));
+const TermsPage = lazyWithRetry(() => import('./pages/footer/TermsPage'));
+const CookiePolicyPage = lazyWithRetry(() => import('./pages/footer/CookiePolicyPage'));
+const RefundPolicyPage = lazyWithRetry(() => import('./pages/footer/RefundPolicyPage'));
+const NotFoundPage = lazyWithRetry(() => import('./pages/NotFoundPage'));
+const SecurityPage = lazyWithRetry(() => import('./pages/TrustPage').then(m => ({ default: m.SecurityPage })));
+const StatusPage = lazyWithRetry(() => import('./pages/TrustPage').then(m => ({ default: m.StatusPage })));
+const BlogIndexPage = lazyWithRetry(() => import('./pages/BlogPage').then(m => ({ default: m.BlogIndexPage })));
+const BlogPostPage = lazyWithRetry(() => import('./pages/BlogPage').then(m => ({ default: m.BlogPostPage })));
 
 function Spinner() {
   return <LogoLoader />;
@@ -157,11 +158,18 @@ function WithLang({ lang, children }: { lang: 'fr' | 'en'; children: React.React
   return <>{children}</>;
 }
 
+/** Une erreur sur une page ne bloque plus la navigation : la frontière se réinitialise à chaque changement de page. */
+function RouteErrorBoundary({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation();
+  return <ErrorBoundary key={pathname}>{children}</ErrorBoundary>;
+}
+
 export default function App() {
   return (
     <ErrorBoundary>
     <BrowserRouter>
       <GlobalErrorListener />
+      <RouteErrorBoundary>
       <Suspense fallback={<Spinner />}>
       <Routes>
         <Route path="/" element={<WithLang lang="fr"><LandingPage /></WithLang>} />
@@ -247,6 +255,7 @@ export default function App() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       </Suspense>
+      </RouteErrorBoundary>
     </BrowserRouter>
     </ErrorBoundary>
   );

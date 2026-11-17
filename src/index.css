@@ -237,3 +237,32 @@ body {
 
 .lb-outline-dark { color: #0a1620 !important; -webkit-text-stroke: 4px rgba(255,255,255,.75); paint-order: stroke fill; }
 @media (max-width: 640px) { .lb-outline-dark { -webkit-text-stroke-width: 2.4px; } }
+
+/* ── Bouton assistant IA : logo LiBooks animé ───────────────────────── */
+.lb-ai-ring {
+  background: conic-gradient(from 0deg, #0057D9, #22D3EE, #8B5CF6, #3B82F6, #0057D9);
+  animation: lb-ai-spin 4s linear infinite;
+}
+.lb-ai-halo {
+  background: radial-gradient(circle, rgba(59,130,246,0.45) 0%, rgba(139,92,246,0.25) 45%, transparent 70%);
+  animation: lb-ai-breathe 2.8s ease-in-out infinite;
+}
+.lb-ai-logo { animation: lb-ai-float 3.2s ease-in-out infinite; transition: transform .4s cubic-bezier(.2,.8,.2,1); }
+.lb-ai-fab:hover .lb-ai-logo { transform: rotate(-8deg) scale(1.12); animation-play-state: paused; }
+.lb-ai-fab:hover .lb-ai-ring { animation-duration: 1.4s; }
+.lb-ai-shine {
+  background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.9) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: lb-ai-sweep 4.5s ease-in-out infinite;
+  z-index: 1;
+  mix-blend-mode: overlay;
+}
+.lb-ai-spark { animation: lb-ai-twinkle 2.4s ease-in-out infinite; }
+@keyframes lb-ai-spin { to { transform: rotate(360deg); } }
+@keyframes lb-ai-breathe { 0%,100% { transform: scale(0.95); opacity: .55; } 50% { transform: scale(1.25); opacity: 1; } }
+@keyframes lb-ai-float { 0%,100% { transform: translateY(1px) rotate(0); } 50% { transform: translateY(-2px) rotate(-4deg); } }
+@keyframes lb-ai-sweep { 0%,60% { transform: translateX(-120%); } 85%,100% { transform: translateX(120%); } }
+@keyframes lb-ai-twinkle { 0%,100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.18) rotate(18deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .lb-ai-ring, .lb-ai-halo, .lb-ai-logo, .lb-ai-shine, .lb-ai-spark { animation: none !important; }
+}

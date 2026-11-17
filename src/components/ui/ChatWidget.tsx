@@ -210,13 +210,23 @@ export default function ChatWidget() {
           )}
           <button
             onClick={openChat}
-            className="group relative w-14 h-14 rounded-full text-white shadow-xl shadow-[#0057D9]/40 hover:scale-110 transition-transform flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg,#0057D9 0%,#3B82F6 55%,#8B5CF6 100%)' }}
+            className="lb-ai-fab group relative w-14 h-14 rounded-full flex items-center justify-center shadow-xl shadow-[#0057D9]/35 hover:scale-110 active:scale-95 transition-transform duration-300"
             aria-label={isFr ? 'Ouvrir l’assistant IA Libooks' : 'Open the Libooks AI assistant'}
             title="Libooks IA"
           >
-            <span className="absolute inset-0 rounded-full animate-ping bg-[#0057D9]/25 [animation-duration:3s]" />
-            <Sparkles className="relative w-6 h-6" />
+            {/* halo qui respire */}
+            <span className="lb-ai-halo absolute -inset-1 rounded-full" />
+            {/* anneau dégradé en rotation */}
+            <span className="lb-ai-ring absolute inset-0 rounded-full" />
+            {/* cœur blanc + logo */}
+            <span className="relative w-[48px] h-[48px] rounded-full bg-white dark:bg-surface-1 flex items-center justify-center overflow-hidden">
+              <span className="lb-ai-shine absolute inset-0" />
+              <img src={logo} alt="" className="lb-ai-logo relative w-8 h-8 object-contain" />
+            </span>
+            {/* étincelle IA */}
+            <span className="lb-ai-spark absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center text-white ring-2 ring-white dark:ring-surface-1" style={{ background: 'linear-gradient(135deg,#3B82F6,#8B5CF6)' }}>
+              <Sparkles className="w-3 h-3" />
+            </span>
           </button>
         </div>
       )}

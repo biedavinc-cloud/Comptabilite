@@ -2,6 +2,7 @@ import { Component, ReactNode, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { AlertTriangle } from 'lucide-react';
 import * as Sentry from '@sentry/react';
+import { isChunkLoadError, reloadForNewVersion } from '../../lib/lazyWithRetry';
 
 /**
  * Reports uncaught errors both to Sentry (real-time alerting, stack
@@ -36,17 +37,26 @@ async function reportClientError(message: string, stack?: string, severity: 'err
 export function GlobalErrorListener() {
   useEffect(() => {
     function handleError(event: ErrorEvent) {
+      if (isChunkLoadError(event.error ?? event.message) && reloadForNewVersion()) return;
       reportClientError(event.message, event.error?.stack);
     }
     function handleRejection(event: PromiseRejectionEvent) {
       const reason = event.reason;
       const message = reason instanceof Error ? reason.message : String(reason);
       const stack = reason instanceof Error ? reason.stack : undefined;
+      if (isChunkLoadError(reason) && reloadForNewVersion()) return;
       reportClientError(`Unhandled promise rejection: ${message}`, stack);
     }
+    // Vite signale un préchargement échoué (fichier d'une ancienne version) : rechargement unique.
+    function handlePreloadError(event: Event) {
+      event.preventDefault();
+      reloadForNewVersion();
+    }
+    window.addEventListener('vite:preloadError', handlePreloadError);
     window.addEventListener('error', handleError);
     window.addEventListener('unhandledrejection', handleRejection);
     return () => {
+      window.removeEventListener('vite:preloadError', handlePreloadError);
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleRejection);
     };
@@ -65,6 +75,8 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBound
   }
 
   componentDidCatch(error: Error, info: { componentStack: string }) {
+    // Nouvelle version déployée : on recharge silencieusement au lieu d'afficher une erreur.
+    if (isChunkLoadError(error) && reloadForNewVersion()) return;
     reportClientError(error.message, `${error.stack}\n\nComponent stack:${info.componentStack}`);
   }
 
