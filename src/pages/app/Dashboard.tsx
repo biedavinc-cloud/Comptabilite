@@ -16,6 +16,8 @@ import { fr } from 'date-fns/locale';
 import { Link, Navigate } from 'react-router-dom';
 import Badge from '../../components/ui/Badge';
 import { useState } from 'react';
+import { SlidersHorizontal } from 'lucide-react';
+import DashboardCustomizer, { useDashboardLayout, DashboardWidgetId } from '../../components/dashboard/DashboardCustomizer';
 
 const STATUS_COLORS: Record<string, string> = {
   paid: '#0057D9',
@@ -76,6 +78,9 @@ export default function Dashboard() {
   const { isSuperAdmin, staffInfo, user } = useAuth();
   const tenantId = tenant?.id;
   const [teamPeriod, setTeamPeriod] = useState<'month' | 'quarter' | 'year'>('month');
+  const [customizing, setCustomizing] = useState(false);
+  const canCustomize = tenant?.plan === 'premium' || tenant?.plan === 'enterprise';
+  const { layout, saveLayout } = useDashboardLayout(tenantId, user?.id, canCustomize);
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ['dashboard-stats', tenantId],
@@ -310,10 +315,10 @@ export default function Dashboard() {
       <div className="p-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl p-5 border border-gray-100 animate-pulse">
-              <div className="w-11 h-11 bg-gray-200 rounded-xl mb-3" />
-              <div className="h-7 bg-gray-200 rounded mb-2 w-2/3" />
-              <div className="h-4 bg-gray-100 rounded w-1/2" />
+            <div key={i} className="bg-white dark:bg-surface-1 rounded-2xl p-5 border border-gray-100 dark:border-surface-3 animate-pulse">
+              <div className="w-11 h-11 bg-gray-200 dark:bg-surface-2 rounded-xl mb-3" />
+              <div className="h-7 bg-gray-200 dark:bg-surface-2 rounded mb-2 w-2/3" />
+              <div className="h-4 bg-gray-100 dark:bg-surface-3 rounded w-1/2" />
             </div>
           ))}
         </div>
@@ -321,19 +326,9 @@ export default function Dashboard() {
     );
   }
 
-  return (
-    <div className="p-4 sm:p-6 space-y-6 dark:bg-surface-0 min-h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dashboard.title')}</h1>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
-            {user?.email} · {tenant?.name}
-          </p>
-        </div>
-        <p className="text-sm text-gray-400 dark:text-gray-500 hidden sm:block">{format(new Date(), 'EEEE d MMMM yyyy', { locale: fr })}</p>
-      </div>
-
+    const widgetNodes: Record<DashboardWidgetId, React.ReactNode> = {
+      kpis: (
+        <>
       {/* Primary stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
@@ -368,6 +363,10 @@ export default function Dashboard() {
         />
       </div>
 
+        </>
+      ),
+      secondary: (
+        <>
       {/* Secondary stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
@@ -387,6 +386,10 @@ export default function Dashboard() {
         ))}
       </div>
 
+        </>
+      ),
+      revenue: (
+        <>
       {/* Revenue area chart + Invoice status donut */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Revenue trend — area chart */}
@@ -470,6 +473,10 @@ export default function Dashboard() {
         </div>
       </div>
 
+        </>
+      ),
+      cashflow: (
+        <>
       {/* Cash flow 30-day trend + Recent invoices */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Cash flow line chart */}
@@ -535,6 +542,10 @@ export default function Dashboard() {
         </div>
       </div>
 
+        </>
+      ),
+      customers: (
+        <>
       {/* Top customers + AR aging */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top customers bar chart */}
@@ -601,6 +612,10 @@ export default function Dashboard() {
         </div>
       </div>
 
+        </>
+      ),
+      team: (
+        <>
       {/* Team performance with bar chart */}
       {teamData && teamData.length > 0 && (
         <div className="bg-white dark:bg-surface-1 rounded-2xl border border-gray-100 dark:border-surface-3 p-4 sm:p-5">
@@ -667,6 +682,52 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      )}
+        </>
+      ),
+    };
+
+  return (
+    <div className={`p-4 sm:p-6 ${layout.density === 'compact' ? 'space-y-4' : 'space-y-6'} dark:bg-surface-0 min-h-full`} style={{ ['--dash-accent' as string]: layout.accent }}>
+      {/* Header */}
+      {layout.greeting ? (
+        <div className="relative overflow-hidden rounded-2xl p-5 sm:p-6 text-white animate-fade-in" style={{ background: `linear-gradient(135deg, #0F2A3D 0%, ${layout.accent} 130%)` }}>
+          <div className="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-white/10 blur-2xl" />
+          <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-white/60">{format(new Date(), 'EEEE d MMMM yyyy', { locale: fr })}</p>
+              <h1 className="text-2xl font-semibold mt-1">{t('dashboard.title')} — {tenant?.name}</h1>
+              <p className="text-sm text-white/70 mt-0.5">{user?.email}</p>
+            </div>
+            <button onClick={() => setCustomizing(true)} className="self-start sm:self-auto inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-sm font-semibold backdrop-blur-sm transition-colors">
+              <SlidersHorizontal className="w-4 h-4" /> {canCustomize ? 'Personnaliser' : 'Personnaliser (Premium)'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dashboard.title')}</h1>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">{user?.email} · {tenant?.name}</p>
+          </div>
+          <button onClick={() => setCustomizing(true)} className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 dark:border-surface-3 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-surface-2">
+            <SlidersHorizontal className="w-4 h-4" /> <span className="hidden sm:inline">Personnaliser</span>
+          </button>
+        </div>
+      )}
+
+      {layout.order.filter((id) => !layout.hidden.includes(id)).map((id) => (
+        <div key={id} className="animate-fade-in">{widgetNodes[id]}</div>
+      ))}
+
+      {customizing && (
+        <DashboardCustomizer
+          layout={layout}
+          canCustomize={canCustomize}
+          saving={saveLayout.isPending}
+          onClose={() => setCustomizing(false)}
+          onSave={(l) => saveLayout.mutate(l, { onSuccess: () => setCustomizing(false) })}
+        />
       )}
     </div>
   );

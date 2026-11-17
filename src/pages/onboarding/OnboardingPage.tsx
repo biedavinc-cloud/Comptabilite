@@ -696,7 +696,7 @@ export default function OnboardingPage() {
                             </li>
                           ))}
                         </ul>
-                        <p className="mt-3 text-xs text-[#0057D9] font-medium">7 jours d'essai gratuit</p>
+                        <p className="mt-3 text-xs text-[#0057D9] font-medium">30 jours d'essai gratuit</p>
                       </button>
                     );
                   })}
@@ -786,7 +786,7 @@ export default function OnboardingPage() {
                 <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
                   <span className="text-amber-500 text-lg">🎁</span>
                   <p className="text-sm text-amber-800">
-                    <strong>7 jours d'essai gratuit</strong> — aucune carte bancaire requise.
+                    <strong>30 jours d'essai gratuit</strong> — aucune carte bancaire requise.
                     Vous passerez en mode lecture seule à la fin de l'essai.
                   </p>
                 </div>

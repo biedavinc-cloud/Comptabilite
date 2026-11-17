@@ -25,7 +25,7 @@ export default function PlanSelectionGate() {
             {t('billing.choosePlan', 'Choisissez votre forfait')}
           </h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base max-w-md mx-auto">
-            Votre essai gratuit de 7 jours est terminé. Vos données sont conservées —
+            Votre essai gratuit de 30 jours est terminé. Vos données sont conservées —
             choisissez un forfait pour retrouver l'accès à votre compte.
           </p>
           {tenant && (

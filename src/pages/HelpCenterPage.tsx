@@ -34,7 +34,7 @@ const CATEGORIES_FR: FaqCategory[] = [
       },
       {
         q: "L'essai gratuit dure combien de temps ?",
-        a: "7 jours, avec accès à toutes les fonctionnalités du forfait que tu choisis. Aucune carte bancaire requise pour démarrer.",
+        a: "30 jours, avec accès à toutes les fonctionnalités du forfait que tu choisis. Aucune carte bancaire requise pour démarrer.",
       },
       {
         q: "LiBooks fonctionne dans quels pays ?",
@@ -139,7 +139,7 @@ const CATEGORIES_EN: FaqCategory[] = [
       },
       {
         q: "How long is the free trial?",
-        a: "7 days, with access to every feature of the plan you choose. No card required to start.",
+        a: "30 days, with access to every feature of the plan you choose. No card required to start.",
       },
       {
         q: "Which countries does LiBooks support?",

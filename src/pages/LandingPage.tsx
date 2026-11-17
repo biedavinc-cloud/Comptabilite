@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ChatWidget from '../components/ui/ChatWidget';
@@ -14,10 +14,13 @@ import {
   Package, Bell, Bot, ScanLine, Languages,
   Mail, MapPin,
   Sun, Moon,
-  Facebook, Instagram, Linkedin, Youtube
+  Facebook, Instagram, Linkedin, Youtube, LayoutDashboard, Rocket, BookOpen
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { PLAN_LIMITS, MODULES, ModuleKey } from '../lib/countryData';
+import { PLAN_LIMITS, MODULES, ModuleKey, COUNTRIES } from '../lib/countryData';
+import {
+  Reveal, SplitText, CountUp, Magnetic, ScrollProgress, useSpotlight, useParallax, GiantScrollText,
+} from '../components/ui/Motion';
 
 const NAVY = '#0F2A3D';
 const GREEN = '#0057D9';
@@ -53,11 +56,15 @@ const FEATURE_CARDS = [
   { icon: ScanLine, title: 'OCR & Paie', desc: 'Numérisation factures par OCR, génération bulletins de paie, déclarations sociales.', color: 'bg-amber-500', premium: true },
 ];
 
+// Fonctionnalités affichées = exactement ce que PLAN_LIMITS (lib/countryData.ts)
+// et les policies RLS débloquent pour chaque forfait — aucune promesse que le
+// produit ne tient pas. « Personnalisation du tableau de bord » est verrouillée
+// en base (migration 042) pour Premium & Entreprise.
 const PLANS = [
-  { id: 'starter', name: 'Starter', price: 14, features: ['Facturation illimitée', 'Gestion stocks', '2 utilisateurs', 'Support email'], color: 'border-gray-200 dark:border-surface-3' },
-  { id: 'pro', name: 'Pro', price: 29, features: ['Tout Starter', 'Banque & Mobile Money', 'WhatsApp', 'Multi-magasin', '5 utilisateurs'], color: `border-[${GREEN}]`, popular: true },
-  { id: 'premium', name: 'Premium', price: 79, features: ['Tout Pro', 'IA Trésorerie & FX', 'OHADA complet', 'OCR & Paie', 'Utilisateurs illimités'], color: 'border-blue-300 dark:border-blue-500/50' },
-  { id: 'enterprise', name: 'Entreprise', price: 199, features: ['Tout Premium', 'Multi-société', 'API & intégrations', 'Support dédié 24/7', 'SLA 99.9%'], color: 'border-purple-300 dark:border-purple-500/50' },
+  { id: 'starter', name: 'Starter', price: 14, tagline: 'Pour lancer et structurer son activité', features: ['Facturation illimitée & avoirs', 'Factures personnalisées (logo, cachet, couleurs)', 'Stocks multi-magasins', 'Clients, fournisseurs, grand livre', 'Rapports & TVA', '2 utilisateurs', 'Assistant IA Libooks'], color: 'border-gray-200 dark:border-surface-3' },
+  { id: 'pro', name: 'Pro', price: 29, tagline: 'Pour encaisser partout, plus vite', features: ['Tout Starter', 'Banque & Mobile Money', 'Rapprochement bancaire', 'Envoi WhatsApp des factures', '5 utilisateurs'], color: 'border-[#0057D9]', popular: true },
+  { id: 'premium', name: 'Premium', price: 79, tagline: 'Pour piloter avec l’IA et l’OHADA complet', features: ['Tout Pro', 'Tableau de bord personnalisable', 'IA Trésorerie & FX', 'OHADA complet (bilan, résultat)', 'Immobilisations & amortissements', 'Factures récurrentes', 'Utilisateurs illimités'], color: 'border-blue-300 dark:border-blue-500/50' },
+  { id: 'enterprise', name: 'Entreprise', price: 199, tagline: 'Pour les groupes et multi-sociétés', features: ['Tout Premium', 'Tableau de bord personnalisable', 'Multi-société', 'API & intégrations', 'Support dédié 24/7', 'SLA 99,9 %'], color: 'border-purple-300 dark:border-purple-500/50' },
 ];
 
 // Libellés FR pour la matrice de comparaison. La liste des modules réellement
@@ -101,44 +108,12 @@ const FAQS = [
   { q: 'LiBooks fonctionne-t-il hors connexion ?', a: 'Oui. L\'application est une PWA (Progressive Web App) avec mode offline-first. Vous pouvez créer factures, mouvements de stock et transactions sans connexion. Les données se synchronisent automatiquement dès le retour du réseau, avec déduplication par clés d\'idempotence.' },
   { q: 'Le plan comptable SYSCOHADA est-il inclus ?', a: 'Oui. Pour tous les pays OHADA (Cameroun, Sénégal, Côte d\'Ivoire, etc.), le plan SYSCOHADA révisé est pré-configuré automatiquement à la création du compte, avec plus de 40 comptes des classes 1 à 7.' },
   { q: 'Puis-je utiliser mon Mobile Money pour encaisser ?', a: 'Le module Banque & Mobile Money (forfait Pro et supérieur) intègre Orange Money, MTN MoMo, Wave et Moov Money. Les encaissements apparaissent automatiquement dans vos transactions.' },
-  { q: 'Comment fonctionne la facturation ?', a: 'Vous bénéficiez d\'un essai gratuit de 7 jours sans carte bancaire. Ensuite, vous choisissez un forfait (Starter, Pro, Premium, Entreprise). Le paiement se fait via Stripe, en mensuel ou annuel (-20%). Vous pouvez changer de forfait à tout moment avec proration.' },
+  { q: 'Comment fonctionne la facturation ?', a: 'Vous bénéficiez d\'un essai gratuit de 30 jours sans carte bancaire, avec accès complet. Ensuite, vous choisissez un forfait (Starter, Pro, Premium, Entreprise), en mensuel ou annuel (-20%). Paiement par carte (Stripe, Paddle, PayUnit, Paystack) ou Mobile Money (CinetPay, Korapay, Flutterwave). Vous pouvez changer de forfait à tout moment.' },
+  { q: 'Puis-je personnaliser mes factures et mon tableau de bord ?', a: 'Oui. Sur tous les forfaits, vos factures portent votre logo, votre cachet, vos couleurs, vos mentions légales et vos conditions de paiement. Sur Premium et Entreprise, chaque utilisateur peut en plus personnaliser son tableau de bord : choix et ordre des widgets, couleur d\'accent et densité.' },
+  { q: 'Qu\'est-ce que l\'assistant IA Libooks ?', a: 'Libooks est l\'assistant IA intégré à la plateforme : il répond en quelques secondes à vos questions de comptabilité (SYSCOHADA, TVA, écritures), vous guide dans l\'application et passe la main à un conseiller humain quand vous le demandez.' },
   { q: 'Mes données sont-elles sécurisées ?', a: 'Absolument. Chaque entreprise a ses données isolées par Row Level Security (RLS) PostgreSQL. Les super admins ont 2FA obligatoire. Toutes les actions sensibles sont journalisées dans un audit log. Vous pouvez exporter ou supprimer vos données à tout moment.' },
   { q: 'Puis-je gérer plusieurs sociétés ?', a: 'Le forfait Entreprise permet de gérer plusieurs sociétés depuis un seul compte, avec consolidation et tableau de bord multi-tenant.' },
 ];
-
-function useInView<T extends HTMLElement>() {
-  const ref = useRef<T>(null);
-  const [inView, setInView] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          obs.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.12 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-  return { ref, inView };
-}
-
-function Reveal({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
-  const { ref, inView } = useInView<HTMLDivElement>();
-  return (
-    <div
-      ref={ref}
-      className={`transition-all duration-700 ease-out ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
-    </div>
-  );
-}
 
 const ALL_LANGUAGES = [
   { code: 'fr', label: 'Français', flag: '🇫🇷' },
@@ -266,6 +241,8 @@ export default function LandingPage() {
     };
   }, [i18n.language]);
   const { theme, toggleTheme } = useTheme();
+  useSpotlight();
+  const heroVisualRef = useParallax<HTMLDivElement>(0.08);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [annual, setAnnual] = useState(false);
@@ -279,7 +256,8 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-surface-0 transition-colors">
+    <div className="min-h-screen bg-white dark:bg-surface-0 transition-colors overflow-x-clip">
+      <ScrollProgress />
       {/* ===== NAVBAR ===== */}
       <MarketingBanner />
       <nav className={`sticky top-0 z-50 transition-all duration-300 bg-white/90 dark:bg-surface-1/90 backdrop-blur-sm py-3 ${scrolled ? 'shadow-sm' : ''}`}>
@@ -296,6 +274,7 @@ export default function LandingPage() {
             <a href="#pricing" className="text-sm font-medium transition-colors hover:text-[#0057D9] text-gray-700 dark:text-gray-300">{t('landing.navPricing')}</a>
             <a href="#testimonials" className="text-sm font-medium transition-colors hover:text-[#0057D9] text-gray-700 dark:text-gray-300">{t('landing.navTestimonials')}</a>
             <a href="#faq" className="text-sm font-medium transition-colors hover:text-[#0057D9] text-gray-700 dark:text-gray-300">{t('landing.navFaq')}</a>
+            <Link to={isEn ? '/en/blog' : '/blog'} className="text-sm font-medium transition-colors hover:text-[#0057D9] text-gray-700 dark:text-gray-300">Blog</Link>
           </div>
 
           <div className="hidden md:flex items-center gap-3">
@@ -312,9 +291,11 @@ export default function LandingPage() {
             <Link to="/login" className="text-sm font-medium px-4 py-2 rounded-lg transition-colors text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-surface-2">
               {t('landing.navLogin')}
             </Link>
-            <Link to="/signup" className="text-sm font-semibold px-5 py-2.5 rounded-xl text-white shadow-lg hover:shadow-xl transition-all hover:scale-105" style={{ background: GREEN }}>
-              {t('landing.navSignup')}
-            </Link>
+            <Magnetic strength={0.2}>
+              <Link to="/signup" className="inline-block text-sm font-semibold px-5 py-2.5 rounded-xl text-white shadow-lg shadow-[#0057D9]/30 hover:shadow-xl transition-all hover:scale-105" style={{ background: GREEN }}>
+                {t('landing.navSignup')}
+              </Link>
+            </Magnetic>
           </div>
 
           <button onClick={() => setMobileMenu(!mobileMenu)} className={`md:hidden p-2 text-gray-900 dark:text-white`}>
@@ -328,6 +309,7 @@ export default function LandingPage() {
             <a href="#pricing" onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-gray-700 dark:text-gray-200 py-2">{t('landing.navPricing')}</a>
             <a href="#testimonials" onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-gray-700 dark:text-gray-200 py-2">{t('landing.navTestimonials')}</a>
             <a href="#faq" onClick={() => setMobileMenu(false)} className="block text-sm font-medium text-gray-700 dark:text-gray-200 py-2">{t('landing.navFaq')}</a>
+            <Link to={isEn ? '/en/blog' : '/blog'} className="block text-sm font-medium text-gray-700 dark:text-gray-200 py-2">Blog</Link>
             <div className="flex items-center gap-2 py-2">
               <button onClick={toggleTheme} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                 {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -345,6 +327,7 @@ export default function LandingPage() {
       <section className="relative min-h-[auto] pt-8 pb-16 md:min-h-screen md:py-0 flex items-center overflow-hidden bg-white dark:bg-surface-0">
         {/* Soft gradient wash */}
         <div className="absolute inset-0 bg-gradient-to-b from-blue-50/70 via-white to-white dark:from-surface-1 dark:via-surface-0 dark:to-surface-0" />
+        <div className="absolute inset-0 lb-aurora pointer-events-none" />
         {/* Decorative blobs — soft pastel on light, brand-colored glow on dark */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-30 dark:opacity-20 blur-3xl animate-pulse" style={{ background: '#BFDBFE' }} />
@@ -356,39 +339,50 @@ export default function LandingPage() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 lg:py-0 grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-white/10 backdrop-blur-sm border border-blue-100 dark:border-white/10 mb-6 animate-fade-in">
+            <Reveal variant="down" duration={700}>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-white/10 backdrop-blur-sm border border-blue-100 dark:border-white/10 mb-6">
               <Sparkles className="w-4 h-4" style={{ color: GREEN }} />
               <span className="text-sm font-medium" style={{ color: GREEN }}>{t('landing.heroBadge')}</span>
             </div>
+            </Reveal>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-[1.1] tracking-tight mb-6">
-              {t('landing.heroTitle')}<br />
-              <span style={{ color: GREEN }}>{t('landing.heroTitleAccent')}</span>
+              <SplitText text={t('landing.heroTitle')} /><br />
+              <SplitText text={t('landing.heroTitleAccent')} wordClassName="lb-gradient-text" delay={250} />
             </h1>
 
+            <Reveal delay={450}>
             <p className="text-lg text-gray-600 dark:text-white/70 mb-8 max-w-lg leading-relaxed">
               {t('landing.heroSub')}
             </p>
+            </Reveal>
 
+            <Reveal delay={600}>
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
-              <Link to="/signup" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white text-base font-semibold shadow-xl hover:shadow-2xl transition-all hover:scale-105" style={{ background: GREEN }}>
+              <Magnetic strength={0.18} className="w-full sm:w-auto">
+              <Link to="/signup" className="group w-full inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl text-white text-base font-semibold shadow-xl shadow-[#0057D9]/30 hover:shadow-2xl transition-all hover:scale-105" style={{ background: GREEN }}>
                 {t('landing.heroCta')}
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
+              </Magnetic>
               <a href="#modules" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-white dark:bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-white/20 text-gray-900 dark:text-white text-base font-semibold hover:bg-gray-50 dark:hover:bg-white/15 transition-all shadow-sm">
                 {t('landing.heroDiscover')}
               </a>
             </div>
+            </Reveal>
 
-            <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-white/60">
+            <Reveal delay={750}>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-white/60">
               <div className="flex items-center gap-2"><CheckCircle className="w-4 h-4" style={{ color: GREEN }} /> {t('landing.heroFree')}</div>
               <div className="flex items-center gap-2"><CheckCircle className="w-4 h-4" style={{ color: GREEN }} /> {t('landing.heroNoCc')}</div>
               <div className="flex items-center gap-2"><CheckCircle className="w-4 h-4" style={{ color: GREEN }} /> FR / EN</div>
             </div>
+            </Reveal>
           </div>
 
           {/* Hero visual: Dashboard mockup */}
-          <div className="relative hidden lg:block">
+          <div ref={heroVisualRef} className="relative hidden lg:block will-change-transform">
+            <Reveal variant="right" delay={300} duration={1100}>
             <div className="relative rounded-2xl bg-white dark:bg-surface-1 shadow-2xl ring-1 ring-gray-100 dark:ring-0 overflow-hidden rotate-1 hover:rotate-0 transition-transform duration-500">
               {/* Mock browser bar */}
               <div className="flex items-center gap-1.5 px-4 py-3 bg-gray-50 dark:bg-surface-2 border-b border-gray-100 dark:border-surface-3">
@@ -412,14 +406,22 @@ export default function LandingPage() {
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Évolution mensuelle</p>
                   <div className="flex items-end gap-2 h-32">
                     {[40, 55, 45, 70, 60, 85, 75, 95].map((h, i) => (
-                      <div key={i} className="flex-1 rounded-t transition-all duration-700 hover:opacity-80" style={{ height: `${h}%`, background: i % 2 === 0 ? GREEN : '#3B82F6', transitionDelay: `${i * 80}ms` }} />
+                      <div key={i} className="flex-1 rounded-t hover:opacity-80 lb-bar" style={{ height: `${h}%`, background: i % 2 === 0 ? GREEN : '#3B82F6', animationDelay: `${600 + i * 90}ms` }} />
                     ))}
                   </div>
                 </div>
               </div>
             </div>
-            {/* Floating badge */}
-            <div className="absolute -bottom-4 -left-4 bg-white dark:bg-surface-1 rounded-2xl shadow-xl ring-1 ring-gray-100 dark:ring-0 p-4 flex items-center gap-3 animate-bounce" style={{ animationDuration: '3s' }}>
+            </Reveal>
+            {/* Floating badges */}
+            <div className="absolute -top-6 -right-4 bg-white dark:bg-surface-1 rounded-2xl shadow-xl ring-1 ring-gray-100 dark:ring-0 px-4 py-3 flex items-center gap-3 lb-float-slow">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-violet-500"><Bot className="w-5 h-5 text-white" /></div>
+              <div>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">Assistant IA Libooks</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Réponse en 2 secondes</p>
+              </div>
+            </div>
+            <div className="absolute -bottom-4 -left-4 bg-white dark:bg-surface-1 rounded-2xl shadow-xl ring-1 ring-gray-100 dark:ring-0 p-4 flex items-center gap-3 lb-float">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: GREEN }}>
                 <Wifi className="w-5 h-5 text-white" />
               </div>
@@ -440,20 +442,38 @@ export default function LandingPage() {
       <PartnerLogoBanner />
 
       {/* ===== STATS BAR ===== */}
-      <section className="py-12 bg-white dark:bg-surface-0 border-b border-gray-100 dark:border-surface-3">
+      <section className="py-14 bg-white dark:bg-surface-0 border-b border-gray-100 dark:border-surface-3">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-2 lg:grid-cols-4 gap-8">
           {[
-            { value: '62', label: t('landing.statCountries') },
-            { value: '24', label: t('landing.statModules') },
-            { value: '99.9%', label: t('landing.statSla') },
-            { value: '7j', label: t('landing.statTrial') },
+            { to: COUNTRIES.length, suffix: '', decimals: 0, label: t('landing.statCountries') },
+            { to: MODULES.length, suffix: '', decimals: 0, label: t('landing.statModules') },
+            { to: 99.9, suffix: '%', decimals: 1, label: t('landing.statSla') },
+            { to: 30, suffix: isEn ? ' days' : ' j', decimals: 0, label: t('landing.statTrial') },
           ].map((s, i) => (
-            <Reveal key={s.label} delay={i * 100}>
-              <div className="text-center">
-                <p className="text-3xl lg:text-4xl font-medium" style={{ color: NAVY }}>{s.value}</p>
+            <Reveal key={s.label} delay={i * 120}>
+              <div className="text-center group">
+                <p className="text-4xl lg:text-5xl font-semibold tracking-tight text-[#0F2A3D] dark:text-white tabular-nums">
+                  <CountUp to={s.to} suffix={s.suffix} decimals={s.decimals} />
+                </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{s.label}</p>
+                <span className="block mx-auto mt-3 h-0.5 w-8 rounded-full bg-[#0057D9]/30 group-hover:w-16 group-hover:bg-[#0057D9] transition-all duration-500" />
               </div>
             </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ===== BANDE DÉFILANTE ===== */}
+      <section aria-hidden="true" className="relative py-5 bg-[#0F2A3D] overflow-hidden">
+        <div className="flex w-max lb-marquee gap-10">
+          {[0, 1].map((rep) => (
+            <div key={rep} className="flex gap-10 items-center">
+              {['SYSCOHADA révisé', 'Mobile Money', 'Facturation illimitée', 'IA Libooks', 'Offline-first', 'Multi-devises', 'CinetPay', 'Korapay', 'WhatsApp', 'API ouverte', 'Paie & OCR', 'Multi-société'].map((w) => (
+                <span key={w} className="flex items-center gap-10 text-white/80 text-lg font-medium whitespace-nowrap">
+                  {w}<Sparkles className="w-4 h-4 text-[#3B82F6]" />
+                </span>
+              ))}
+            </div>
           ))}
         </div>
       </section>
@@ -467,7 +487,7 @@ export default function LandingPage() {
                 {t('landing.sectionAfrica')}
               </span>
               <h2 className="text-3xl lg:text-4xl font-medium mb-4 text-gray-900 dark:text-white">
-                {t('landing.sectionAfricaTitle')}
+                <SplitText text={t('landing.sectionAfricaTitle')} />
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
                 {t('landing.sectionAfricaSub')}
@@ -477,14 +497,14 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {(isEn ? [
-              { icon: Globe, title: '97 countries supported', desc: 'Cameroon, Senegal, Ivory Coast, Nigeria, Kenya, Ghana, France, UAE, and more. Regions, cities, currencies, VAT rates — all pre-configured.' },
+              { icon: Globe, title: `${COUNTRIES.length} countries supported`, desc: 'Cameroon, Senegal, Ivory Coast, Nigeria, Kenya, Ghana, France, UAE, and more. Regions, cities, currencies, VAT rates — all pre-configured.' },
               { icon: Wifi, title: 'Offline-first', desc: 'Unstable connection? No problem. Create invoices and transactions offline. Syncing happens automatically once the network is back.' },
               { icon: Smartphone, title: 'Native Mobile Money', desc: 'Orange Money, MTN MoMo, Wave, Moov Money. Collect, track, reconcile — without leaving the app.' },
               { icon: Shield, title: 'Native OHADA', desc: 'Revised SYSCOHADA chart pre-configured. Balance sheet, income statement, filings — OHADA-compliant.' },
               { icon: Languages, title: 'Bilingual FR / EN', desc: 'The full interface, in French and English. Switch in one click, for your whole team.' },
               { icon: Zap, title: 'Fast & lightweight', desc: 'Installable PWA, under 3MB. Works on phone, tablet, desktop. Even on a Samsung A10.' },
             ] : [
-              { icon: Globe, title: '97 pays supportés', desc: 'Cameroun, Sénégal, Côte d\'Ivoire, Nigeria, Kenya, Ghana, France, Émirats Arabes Unis, et plus. Régions, villes, devises, taux de TVA — tout est pré-configuré.' },
+              { icon: Globe, title: `${COUNTRIES.length} pays supportés`, desc: 'Cameroun, Sénégal, Côte d\'Ivoire, Nigeria, Kenya, Ghana, France, Émirats Arabes Unis, et plus. Régions, villes, devises, taux de TVA — tout est pré-configuré.' },
               { icon: Wifi, title: 'Offline-first', desc: 'Connexion instable ? Aucun problème. Créez factures et mouvements hors ligne. La synchronisation est automatique au retour du réseau.' },
               { icon: Smartphone, title: 'Mobile Money natif', desc: 'Orange Money, MTN MoMo, Wave, Moov Money. Encaissez, suivez, rapprochez — sans quitter l\'application.' },
               { icon: Shield, title: 'OHADA natif', desc: 'Plan SYSCOHADA révisé pré-configuré. Bilan, compte de résultat, déclarations — conformes aux normes OHADA.' },
@@ -492,8 +512,8 @@ export default function LandingPage() {
               { icon: Zap, title: 'Rapide & léger', desc: 'PWA installable, moins de 3MB. Fonctionne sur smartphone, tablette, ordinateur. Même sur un Samsung A10.' },
             ]).map((f, i) => (
               <Reveal key={f.title} delay={i * 100}>
-                <div className="bg-white dark:bg-surface-1 rounded-2xl p-6 border border-gray-100 dark:border-surface-3 hover:shadow-lg transition-all hover:-translate-y-1 group h-full">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform" style={{ background: `${GREEN}15` }}>
+                <div className="lb-spotlight bg-white dark:bg-surface-1 rounded-2xl p-6 border border-gray-100 dark:border-surface-3 hover:shadow-xl hover:border-[#0057D9]/30 transition-all duration-500 hover:-translate-y-1.5 group h-full">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500" style={{ background: `${GREEN}15` }}>
                     <f.icon className="w-6 h-6" style={{ color: GREEN }} />
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{f.title}</h3>
@@ -510,11 +530,11 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <Reveal>
             <div className="text-center mb-14">
-              <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-4" style={{ background: `${NAVY}10`, color: NAVY }}>
+              <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-4" style={{ background: `${GREEN}12`, color: GREEN }}>
                 Modules
               </span>
               <h2 className="text-3xl lg:text-4xl font-medium mb-4 text-gray-900 dark:text-white">
-                Tout ce dont votre entreprise a besoin
+                <SplitText text="Tout ce dont votre entreprise a besoin" />
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
                 De la facturation à l'IA trésorerie, un seul abonnement, une seule interface.
@@ -525,13 +545,13 @@ export default function LandingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {FEATURE_CARDS.map((m, i) => (
               <Reveal key={m.title} delay={(i % 3) * 100}>
-                <div className="bg-white dark:bg-surface-1 rounded-2xl p-6 border border-gray-100 dark:border-surface-3 hover:shadow-xl transition-all hover:-translate-y-1 h-full relative">
+                <div className="lb-spotlight group bg-white dark:bg-surface-1 rounded-2xl p-6 border border-gray-100 dark:border-surface-3 hover:shadow-2xl hover:border-[#0057D9]/30 transition-all duration-500 hover:-translate-y-1.5 h-full relative overflow-hidden">
                   {m.premium && (
                     <span className="absolute top-4 right-4 text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${GREEN}15`, color: GREEN }}>
                       Premium
                     </span>
                   )}
-                  <div className={`w-12 h-12 ${m.color} rounded-xl flex items-center justify-center mb-4`}>
+                  <div className={`w-12 h-12 ${m.color} rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500`}>
                     <m.icon className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-base font-medium text-gray-900 dark:text-white mb-2">{m.title}</h3>
@@ -552,10 +572,10 @@ export default function LandingPage() {
                 Tarifs
               </span>
               <h2 className="text-3xl lg:text-4xl font-medium mb-4 text-gray-900 dark:text-white">
-                Des forfaits pour chaque taille
+                <SplitText text="Des forfaits pour chaque taille" />
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8">
-                7 jours d'essai gratuit. Sans carte bancaire. Changez de forfait à tout moment.
+                <strong className="text-gray-900 dark:text-white">30 jours d'essai gratuit</strong>, accès complet. Sans carte bancaire. Changez de forfait à tout moment.
               </p>
 
               {/* Billing toggle */}
@@ -571,22 +591,33 @@ export default function LandingPage() {
             </div>
           </Reveal>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-5 items-stretch">
             {PLANS.map((plan, i) => {
               const price = annual ? Math.round(plan.price * 12 * 0.8) : plan.price;
+              const perMonth = annual ? Math.round((plan.price * 12 * 0.8) / 12) : plan.price;
+              const premiumTier = plan.id === 'premium' || plan.id === 'enterprise';
               return (
-                <Reveal key={plan.id} delay={i * 100}>
-                  <div className={`relative bg-white dark:bg-surface-1 rounded-2xl border-2 p-6 h-full flex flex-col ${plan.popular ? 'shadow-xl scale-105' : 'shadow-sm'} ${plan.color}`}>
+                <Reveal key={plan.id} delay={i * 120} className="h-full">
+                  <div className={`lb-spotlight group relative bg-white dark:bg-surface-1 rounded-2xl border-2 p-6 h-full flex flex-col transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${plan.popular ? 'shadow-xl lg:scale-105 lb-shine-border border-transparent' : 'shadow-sm'} ${plan.popular ? '' : plan.color}`}>
                     {plan.popular && (
-                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-semibold px-4 py-1 rounded-full text-white" style={{ background: GREEN }}>
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-semibold px-4 py-1 rounded-full text-white shadow-lg shadow-[#0057D9]/30 z-10" style={{ background: GREEN }}>
                         Populaire
                       </span>
                     )}
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">{plan.name}</h3>
-                    <div className="mb-4">
-                      <span className="text-4xl font-medium" style={{ color: NAVY }}>${price}</span>
-                      <span className="text-sm text-gray-400">/{annual ? t('onboarding.perYear').replace('/', '') : t('onboarding.perMonth').replace('/', '')}</span>
+                    {premiumTier && (
+                      <span className="absolute top-4 right-4 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">
+                        <LayoutDashboard className="w-3 h-3" /> Dashboard sur-mesure
+                      </span>
+                    )}
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">{plan.name}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 min-h-[2rem]">{plan.tagline}</p>
+                    <div className="mb-1 flex items-end gap-1">
+                      <span className="text-4xl font-semibold tracking-tight text-[#0F2A3D] dark:text-white tabular-nums">${price}</span>
+                      <span className="text-sm text-gray-400 mb-1">/{annual ? t('onboarding.perYear').replace('/', '') : t('onboarding.perMonth').replace('/', '')}</span>
                     </div>
+                    <p className={`text-xs mb-5 h-4 ${annual ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`}>
+                      {annual ? `soit $${perMonth}/mois — vous économisez $${plan.price * 12 - price}` : 'ou -20 % en annuel'}
+                    </p>
                     <ul className="space-y-2.5 mb-6 flex-1">
                       {plan.features.map(f => (
                         <li key={f} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
@@ -595,24 +626,24 @@ export default function LandingPage() {
                         </li>
                       ))}
                     </ul>
-                    <Link to="/signup" className={`w-full py-2.5 rounded-xl text-sm font-semibold text-center transition-all ${plan.popular ? 'text-white hover:opacity-90' : 'border-2 hover:bg-gray-50 dark:hover:bg-surface-2'}`} style={plan.popular ? { background: GREEN } : { borderColor: NAVY, color: NAVY }}>
+                    <Link to="/signup" className={`w-full py-2.5 rounded-xl text-sm font-semibold text-center transition-all ${plan.popular ? 'text-white hover:opacity-90 shadow-lg shadow-[#0057D9]/30' : 'border-2 border-[#0F2A3D] text-[#0F2A3D] dark:border-white/40 dark:text-white hover:bg-gray-50 dark:hover:bg-surface-2'}`} style={plan.popular ? { background: GREEN } : {}}>
                       {t('landing.choosePlan')} {plan.name}
                     </Link>
+                    <p className="text-[11px] text-center text-gray-400 mt-2">30 jours gratuits · sans carte</p>
                   </div>
                 </Reveal>
               );
             })}
           </div>
-          <p className="text-center text-sm text-gray-400 dark:text-gray-500 mt-6">
-            Facturation annuelle avec 20% de réduction. Paiement sécurisé via Stripe.
+          <p className="text-center text-sm text-gray-400 dark:text-gray-500 mt-8">
+            Facturation annuelle avec 20 % de réduction. Paiement sécurisé par carte (Stripe, Paddle, PayUnit, Paystack) ou Mobile Money (CinetPay, Korapay, Flutterwave).
           </p>
 
           {/* ===== MATRICE DE COMPARAISON DÉTAILLÉE ===== */}
           <div className="mt-10 text-center">
             <button
               onClick={() => setShowMatrix(!showMatrix)}
-              className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-xl border-2 transition-all hover:bg-gray-50 dark:hover:bg-surface-2"
-              style={{ borderColor: NAVY, color: NAVY }}
+              className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-xl border-2 border-[#0F2A3D] text-[#0F2A3D] dark:border-white/40 dark:text-white transition-all hover:bg-gray-50 dark:hover:bg-surface-2"
             >
               {showMatrix ? 'Masquer le détail des modules' : 'Voir le détail module par module'}
               <ChevronDown className={`w-4 h-4 transition-transform ${showMatrix ? 'rotate-180' : ''}`} />
@@ -649,6 +680,18 @@ export default function LandingPage() {
                       <td className="px-4 py-3.5 text-center text-gray-900 dark:text-white">1</td>
                       <td className="px-4 py-3.5 text-center font-medium text-gray-900 dark:text-white">Illimité</td>
                     </tr>
+                    <tr className="border-b border-gray-50 dark:border-surface-2">
+                      <td className="px-5 py-3.5 text-gray-700 dark:text-gray-300">Factures personnalisées (logo, cachet, couleurs)</td>
+                      {PLAN_ORDER.map(p => <td key={p} className="px-4 py-3.5 text-center"><CheckCircle className="w-5 h-5 mx-auto" style={{ color: GREEN }} /></td>)}
+                    </tr>
+                    <tr className="border-b border-gray-50 dark:border-surface-2 bg-gray-50/50 dark:bg-surface-2/30">
+                      <td className="px-5 py-3.5 text-gray-700 dark:text-gray-300">Tableau de bord personnalisable</td>
+                      {PLAN_ORDER.map(p => (
+                        <td key={p} className="px-4 py-3.5 text-center">
+                          {p === 'premium' || p === 'enterprise' ? <CheckCircle className="w-5 h-5 mx-auto" style={{ color: GREEN }} /> : <span className="text-gray-300 dark:text-gray-600">—</span>}
+                        </td>
+                      ))}
+                    </tr>
                     {DIFFERENTIATING_MODULES.map((m, idx) => (
                       <tr key={m} className={`border-b border-gray-50 dark:border-surface-2 last:border-0 ${idx % 2 === 0 ? 'bg-gray-50/50 dark:bg-surface-2/30' : ''}`}>
                         <td className="px-5 py-3.5 text-gray-700 dark:text-gray-300">{MODULE_LABELS[m]}</td>
@@ -679,11 +722,11 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <Reveal>
             <div className="text-center mb-14">
-              <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-4" style={{ background: `${NAVY}10`, color: NAVY }}>
+              <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-4" style={{ background: `${GREEN}12`, color: GREEN }}>
                 Témoignages
               </span>
               <h2 className="text-3xl lg:text-4xl font-medium mb-4 text-gray-900 dark:text-white">
-                Ils gèrent leur entreprise avec LiBooks
+                <SplitText text="Ils gèrent leur entreprise avec LiBooks" />
               </h2>
             </div>
           </Reveal>
@@ -691,8 +734,8 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-6">
             {TESTIMONIALS.map((tm, i) => (
               <Reveal key={tm.name} delay={(i % 2) * 100}>
-                <div className="bg-gray-50 dark:bg-surface-2 rounded-2xl p-7 h-full border border-gray-100 dark:border-surface-3 hover:shadow-lg transition-all">
-                  <Quote className="w-8 h-8 mb-4 opacity-20" style={{ color: NAVY }} />
+                <div className="lb-spotlight bg-gray-50 dark:bg-surface-2 rounded-2xl p-7 h-full border border-gray-100 dark:border-surface-3 hover:shadow-xl hover:-translate-y-1 transition-all duration-500">
+                  <Quote className="w-8 h-8 mb-4 opacity-30 text-[#0057D9]" />
                   <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed mb-6 italic">"{tm.text}"</p>
                   <div className="flex items-center gap-3">
                     <div className={`w-12 h-12 ${tm.color} rounded-full flex items-center justify-center text-white font-medium`}>
@@ -722,7 +765,7 @@ export default function LandingPage() {
                 FAQ
               </span>
               <h2 className="text-3xl lg:text-4xl font-medium mb-4 text-gray-900 dark:text-white">
-                Questions fréquentes
+                <SplitText text="Questions fréquentes" />
               </h2>
             </div>
           </Reveal>
@@ -746,22 +789,37 @@ export default function LandingPage() {
       </section>
 
       {/* ===== CTA ===== */}
-      <section className="py-20" style={{ background: NAVY }}>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+      <section className="relative py-24 overflow-hidden" style={{ background: NAVY }}>
+        <div className="absolute inset-0 opacity-60 pointer-events-none" style={{ background: 'radial-gradient(50% 60% at 50% 0%, rgba(0,87,217,.45), transparent 70%)' }} />
+        <div className="absolute -left-20 bottom-0 w-80 h-80 rounded-full bg-[#22D3EE]/10 blur-3xl lb-float-slow" />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <Reveal>
-            <h2 className="text-3xl lg:text-5xl font-medium text-white mb-6">
-              {t('landing.ctaTitle')}
+            <h2 className="text-3xl lg:text-5xl font-semibold tracking-tight text-white mb-6">
+              <SplitText text={t('landing.ctaTitle')} />
             </h2>
             <p className="text-lg text-white/70 mb-8 max-w-xl mx-auto">
               {t('landing.ctaSub')}
             </p>
-            <Link to="/signup" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white text-lg font-semibold shadow-xl hover:shadow-2xl transition-all hover:scale-105" style={{ background: GREEN }}>
+            <Magnetic strength={0.22}>
+            <Link to="/signup" className="group inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white text-lg font-semibold shadow-xl shadow-[#0057D9]/40 hover:shadow-2xl transition-all hover:scale-105" style={{ background: GREEN }}>
+              <Rocket className="w-5 h-5" />
               {t('landing.ctaButton')}
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
+            </Magnetic>
             <p className="text-sm text-white/50 mt-4">{t('landing.ctaNote')}</p>
           </Reveal>
         </div>
+      </section>
+
+      {/* ===== SIGNATURE GÉANTE ===== */}
+      <section className="relative bg-white dark:bg-surface-0 border-t border-gray-100 dark:border-surface-3">
+        <GiantScrollText lines={[
+          { words: [{ text: 'LIBOOKS' }, { text: 'DEV', outline: true }, { text: 'BY', outline: true }, { text: 'LIAFRIK', accent: true }, { text: 'TECH' }] },
+          { words: [{ text: 'COMPTABILITÉ', outline: true }, { text: 'AFRICAINE' }, { text: 'DE', outline: true }, { text: 'RÉFÉRENCE', accent: true }] },
+          { words: [{ text: 'FACTURER' }, { text: 'ENCAISSER', outline: true }, { text: 'PILOTER', accent: true }, { text: 'GRANDIR', outline: true }] },
+        ]} />
+        <p className="sr-only">LiBooks, développé par LiAfrik Tech — la comptabilité africaine de référence.</p>
       </section>
 
       <FlagScrollBanner />
@@ -773,7 +831,7 @@ export default function LandingPage() {
             <div>
               <Link to="/" className="flex items-center gap-2 mb-4">
                 <img src={logo} alt="LiBooks" className="w-8 h-8" />
-                <span className="text-lg font-bold">Li</span><span className="text-[#0057D9] text-lg font-medium">Books</span>
+                <span className="text-lg"><span className="font-bold">Li</span><span className="text-[#0057D9] font-medium">Books</span></span>
               </Link>
               <p className="text-sm text-gray-400 leading-relaxed mb-4">
                 {t('landing.footerTagline')}
@@ -792,6 +850,7 @@ export default function LandingPage() {
             <div>
               <h4 className="text-sm font-semibold mb-4 text-white">{t('landing.footerResources')}</h4>
               <ul className="space-y-2.5">
+                <li><Link to={isEn ? '/en/blog' : '/blog'} className="text-sm text-gray-400 hover:text-white transition-colors inline-flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" /> Blog</Link></li>
                 <li><Link to={isEn ? '/en/about' : '/about'} className="text-sm text-gray-400 hover:text-white transition-colors">{isEn ? 'About' : 'À propos'}</Link></li>
                 <li><Link to={isEn ? '/en/help' : '/help'} className="text-sm text-gray-400 hover:text-white transition-colors">{isEn ? 'Help Center' : "Centre d'aide"}</Link></li>
                 <li><Link to={isEn ? '/en/developers' : '/developers'} className="text-sm text-gray-400 hover:text-white transition-colors">{isEn ? 'Developers / API' : 'Développeurs / API'}</Link></li>
@@ -821,7 +880,7 @@ export default function LandingPage() {
                 <p className="text-sm text-gray-300 font-medium">
                   LiBooks est développé par{' '}
                   <a href="https://liafrik.com" target="_blank" rel="noopener noreferrer" className="text-white font-medium hover:text-[#0057D9] transition-colors">
-                    LiAfrik
+                    LiAfrik Tech
                   </a>{' '}
                   — Dubaï 🇦🇪 & Afrique
                 </p>
@@ -847,45 +906,20 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Instagram feed */}
-          <div className="py-6 border-t border-white/10">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-                <Instagram className="w-4 h-4" /> Suivez-nous sur Instagram
-              </h4>
-              <a
-                href="https://www.instagram.com/liafrik_tech?igsi=eXBjdTc5NG42Zml4&utm_source=qr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-gray-400 hover:text-white transition-colors"
-              >
-                @liafrik_tech
-              </a>
-            </div>
-            {import.meta.env.VITE_INSTAGRAM_FEED_EMBED_URL ? (
-              <iframe
-                src={import.meta.env.VITE_INSTAGRAM_FEED_EMBED_URL}
-                title="Fil Instagram LiAfrik"
-                loading="lazy"
-                className="w-full h-[280px] rounded-xl border-0"
-              />
-            ) : (
-              <a
-                href="https://www.instagram.com/liafrik_tech?igsi=eXBjdTc5NG42Zml4&utm_source=qr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="grid grid-cols-3 sm:grid-cols-6 gap-2"
-              >
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="aspect-square rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center"
-                  >
-                    <Instagram className="w-5 h-5 text-gray-500" />
-                  </div>
-                ))}
-              </a>
-            )}
+          {/* Instagram : simple bouton (aucune vidéo / aucun embed) */}
+          <div className="py-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-gray-400">Les coulisses de LiAfrik Tech, chaque semaine.</p>
+            <a
+              href="https://www.instagram.com/liafrik_tech?igsi=eXBjdTc5NG42Zml4&utm_source=qr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-sm font-semibold text-white shadow-lg hover:scale-105 hover:shadow-xl transition-all"
+              style={{ background: 'linear-gradient(45deg,#F58529 0%,#DD2A7B 45%,#8134AF 75%,#515BD4 100%)' }}
+            >
+              <Instagram className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+              Suivez-nous sur Instagram
+              <span className="text-white/70 font-normal">@liafrik_tech</span>
+            </a>
           </div>
 
           <div className="pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">

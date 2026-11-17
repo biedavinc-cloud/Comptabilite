@@ -7,6 +7,7 @@
 // safety net for the case where the browser tab closes before this fires.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
+import { getSecret, getMode } from "../_shared/integrations.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -52,10 +53,10 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 200, headers: corsHeaders });
 
   try {
-    const apiUser = Deno.env.get("PAYUNIT_API_USER");
-    const apiPassword = Deno.env.get("PAYUNIT_API_PASSWORD");
-    const apiKey = Deno.env.get("PAYUNIT_API_KEY");
-    const mode = Deno.env.get("PAYUNIT_MODE") ?? "test";
+    const apiUser = (await getSecret("payunit", "api_user", "PAYUNIT_API_USER"));
+    const apiPassword = (await getSecret("payunit", "api_password", "PAYUNIT_API_PASSWORD"));
+    const apiKey = (await getSecret("payunit", "api_key", "PAYUNIT_API_KEY"));
+    const mode = (await getMode("payunit", "PAYUNIT_MODE"));
     if (!apiUser || !apiPassword || !apiKey) throw new Error("PayUnit credentials are not configured");
 
     const authHeader = req.headers.get("Authorization") ?? "";
@@ -116,7 +117,14 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Le montant du paiement ne correspond pas au forfait sélectionné. Contacte le support." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    await serviceClient.from("payunit_transactions").update({ status: "success", confirmed_at: new Date().toISOString() }).eq("transaction_id", transaction_id);
+    // Atomic claim (see paystack-verify): replaying an already-confirmed
+    // transaction_id must never extend next_billing_date a second time.
+    const { data: claimed } = await serviceClient.from("payunit_transactions")
+      .update({ status: "success", confirmed_at: new Date().toISOString() })
+      .eq("transaction_id", transaction_id).neq("status", "success").select("transaction_id");
+    if (!claimed || claimed.length === 0) {
+      return new Response(JSON.stringify({ success: true, plan: txRow.plan, already_processed: true }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     // PayUnit is a one-off hosted redirect — there's no stored card token
     // to silently recharge later (unlike Flutterwave's card path), so
     // this is always manual renewal: billing-reminders emails the tenant

@@ -52,8 +52,9 @@ function loadPaddleScript(): Promise<void> {
 export async function openPaddleCheckout(
   options: PaddleCheckoutOptions,
   onEvent?: (event: PaddleEvent) => void,
+  tokenOverride?: string,
 ): Promise<void> {
-  const token = import.meta.env.VITE_PADDLE_CLIENT_TOKEN;
+  const token = tokenOverride || import.meta.env.VITE_PADDLE_CLIENT_TOKEN;
   if (!token) {
     throw new Error("Le paiement par carte via Paddle n'est pas encore configuré (token client manquant).");
   }

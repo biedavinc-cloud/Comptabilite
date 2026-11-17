@@ -4,8 +4,10 @@ import {
   Shield, Users, Building2, UserCheck, Plus, Trash2, AlertTriangle,
   Globe, TrendingUp, Award, UserCog, BarChart3, MapPin, CreditCard, X,
   DollarSign, Activity, Target, GitBranch, Search, RefreshCw,
-  Ticket, UserPlus, TrendingDown, Zap, Headset, Send, Megaphone,
+  Ticket, UserPlus, TrendingDown, Zap, Headset, Send, Megaphone, PlugZap, BookOpen,
 } from 'lucide-react';
+import IntegrationsPanel from '../../components/admin/IntegrationsPanel';
+import BlogPanel from '../../components/admin/BlogPanel';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, AreaChart, Area, LineChart, Line,
@@ -23,7 +25,7 @@ import Badge from '../../components/ui/Badge';
 import toast from 'react-hot-toast';
 import { Navigate } from 'react-router-dom';
 
-type SATab = 'overview' | 'tenants' | 'admins' | 'staff' | 'commercial' | 'performance' | 'logs' | 'support' | 'monitoring' | 'marketing';
+type SATab = 'overview' | 'tenants' | 'admins' | 'staff' | 'commercial' | 'performance' | 'logs' | 'support' | 'monitoring' | 'marketing' | 'integrations' | 'blog';
 
 const ADMIN_MODULES = ['tenants', 'subscriptions', 'support', 'commercial', 'statistics', 'staff'];
 
@@ -404,11 +406,13 @@ export default function SuperAdmin() {
 
   const tabs: { key: SATab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { key: 'overview', label: 'Plateforme', icon: Globe },
+    { key: 'integrations', label: 'Intégrations & PSP', icon: PlugZap },
     { key: 'tenants', label: 'Tenants', icon: Building2 },
     { key: 'admins', label: 'Super Admins', icon: Shield },
     { key: 'staff', label: 'Équipe interne', icon: UserCog },
     { key: 'commercial', label: 'Commercial', icon: Target },
     { key: 'marketing', label: 'Marketing', icon: Megaphone },
+    { key: 'blog', label: 'Blog', icon: BookOpen },
     { key: 'support', label: 'Support', icon: Headset },
     { key: 'monitoring', label: 'Monitoring', icon: AlertTriangle },
     { key: 'performance', label: 'Performance', icon: TrendingUp },
@@ -1443,6 +1447,8 @@ export default function SuperAdmin() {
       {tab === 'support' && <SupportPanel />}
       {tab === 'monitoring' && <MonitoringPanel />}
       {tab === 'marketing' && <MarketingPanel />}
+      {tab === 'integrations' && <IntegrationsPanel />}
+      {tab === 'blog' && <BlogPanel />}
     </div>
   );
 }

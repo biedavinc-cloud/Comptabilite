@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Settings as SettingsIcon, Building2, Scale, CreditCard, Shield, Globe, ChevronRight, Save, Key, Copy, Plus, Trash2 } from 'lucide-react';
+import { Settings as SettingsIcon, Building2, Scale, CreditCard, Shield, Globe, ChevronRight, Save, Key, Copy, Plus, Trash2, Palette } from 'lucide-react';
+import InvoiceBrandingPanel from '../../components/settings/InvoiceBrandingPanel';
 import { supabase } from '../../lib/supabase';
 import { useTenant } from '../../contexts/TenantContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,7 +13,7 @@ import ImageUploader from '../../components/ui/ImageUploader';
 import TwoFactorSettings from '../../components/ui/TwoFactorSettings';
 import { COUNTRIES } from '../../lib/countryData';
 
-type SettingsTab = 'company' | 'legal' | 'banking' | 'taxes' | 'security' | 'language' | 'api';
+type SettingsTab = 'company' | 'invoices' | 'legal' | 'banking' | 'taxes' | 'security' | 'language' | 'api';
 
 export default function Settings() {
   const { t, i18n } = useTranslation();
@@ -102,6 +103,7 @@ export default function Settings() {
 
   const tabs: { key: SettingsTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { key: 'company', label: t('settings.company'), icon: Building2 },
+    { key: 'invoices', label: 'Factures & marque', icon: Palette },
     { key: 'legal', label: t('settings.legal'), icon: Scale },
     { key: 'banking', label: t('settings.banking'), icon: CreditCard },
     { key: 'taxes', label: t('settings.taxes'), icon: SettingsIcon },
@@ -137,8 +139,8 @@ export default function Settings() {
         </div>
 
         {/* Content */}
-        <div className="flex-1">
-          <div className="bg-white dark:bg-surface-1 rounded-2xl border border-gray-100 dark:border-surface-3 p-6">
+        <div className="flex-1 min-w-0">
+          <div className="bg-white dark:bg-surface-1 rounded-2xl border border-gray-100 dark:border-surface-3 p-4 sm:p-6">
             {(activeTab === 'company' || activeTab === 'legal' || activeTab === 'banking' || activeTab === 'taxes') && (
               <div className="space-y-5">
                 {activeTab === 'company' && (
@@ -342,6 +344,13 @@ export default function Settings() {
                   Allemand sont en cours de traduction (affichés en français en attendant) — l'anglais et le
                   français sont eux entièrement disponibles.
                 </p>
+              </div>
+            )}
+            {activeTab === 'invoices' && (
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Personnalisation des factures</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Votre logo, vos couleurs et vos mentions — appliqués à l’écran, au PDF, à l’impression et aux e-mails.</p>
+                <InvoiceBrandingPanel />
               </div>
             )}
             {activeTab === 'api' && <ApiKeysPanel tenantId={tenant!.id} />}

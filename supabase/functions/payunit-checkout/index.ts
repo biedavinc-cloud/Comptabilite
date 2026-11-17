@@ -20,6 +20,7 @@
 //   APP_URL                  - e.g. https://libooks.liafrik.com (for redirect/notify URLs)
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
+import { getSecret, getMode } from "../_shared/integrations.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -84,10 +85,10 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 200, headers: corsHeaders });
 
   try {
-    const apiUser = Deno.env.get("PAYUNIT_API_USER");
-    const apiPassword = Deno.env.get("PAYUNIT_API_PASSWORD");
-    const apiKey = Deno.env.get("PAYUNIT_API_KEY");
-    const mode = Deno.env.get("PAYUNIT_MODE") ?? "test";
+    const apiUser = (await getSecret("payunit", "api_user", "PAYUNIT_API_USER"));
+    const apiPassword = (await getSecret("payunit", "api_password", "PAYUNIT_API_PASSWORD"));
+    const apiKey = (await getSecret("payunit", "api_key", "PAYUNIT_API_KEY"));
+    const mode = (await getMode("payunit", "PAYUNIT_MODE"));
     if (!apiUser || !apiPassword || !apiKey) throw new Error("PayUnit credentials are not configured");
 
     const authHeader = req.headers.get("Authorization") ?? "";

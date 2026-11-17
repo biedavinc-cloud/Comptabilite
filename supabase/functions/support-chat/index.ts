@@ -36,8 +36,8 @@ const FAQ: FaqEntry[] = [
   {
     keywords: { fr: ["essai", "gratuit", "gratuitement", "tester"], en: ["free trial", "trial", "try", "free"] },
     answer: {
-      fr: "Oui ! Tu peux essayer LiBooks gratuitement, sans carte bancaire. Clique sur \"Essai gratuit\" en haut de la page pour démarrer.",
-      en: "Yes! You can try LiBooks for free, no credit card required. Click \"Free trial\" at the top of the page to get started.",
+      fr: "Oui ! Tu peux essayer LiBooks gratuitement pendant 30 jours, sans carte bancaire. Clique sur \"Essai gratuit\" en haut de la page pour démarrer.",
+      en: "Yes! You can try LiBooks free for 30 days, no credit card required. Click \"Free trial\" at the top of the page to get started.",
     },
   },
   {
@@ -64,8 +64,8 @@ const FAQ: FaqEntry[] = [
   {
     keywords: { fr: ["paiement", "payer", "carte bancaire", "mobile money", "orange money", "momo"], en: ["payment", "pay", "credit card", "mobile money"] },
     answer: {
-      fr: "Tu peux payer ton abonnement par carte bancaire (PayUnit) ou par Mobile Money / carte locale (Flutterwave) -- au choix, directement depuis la page Facturation de ton compte.",
-      en: "You can pay for your subscription by credit card (PayUnit) or Mobile Money / local card (Flutterwave) -- your choice, right from your account's Billing page.",
+      fr: "Tu peux payer ton abonnement par carte bancaire (Stripe, Paddle, PayUnit, Paystack) ou par Mobile Money (CinetPay, Korapay, Flutterwave : Orange Money, MTN MoMo, Moov, Wave...) -- au choix, directement depuis la page Facturation de ton compte.",
+      en: "You can pay for your subscription by card (Stripe, Paddle, PayUnit, Paystack) or Mobile Money (CinetPay, Korapay, Flutterwave) -- your choice, right from your account's Billing page.",
     },
   },
   {

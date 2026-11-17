@@ -13,6 +13,7 @@
 //   FLUTTERWAVE_SECRET_KEY, FLUTTERWAVE_WEBHOOK_HASH
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
+import { getSecret } from "../_shared/integrations.ts";
 
 async function logFunctionError(functionName, error, context = {}) {
   try {
@@ -43,8 +44,8 @@ function priceForCycle(monthlyPrice: number, cycle: string): number {
 
 Deno.serve(async (req: Request) => {
   try {
-  const expectedHash = Deno.env.get("FLUTTERWAVE_WEBHOOK_HASH");
-  const secretKey = Deno.env.get("FLUTTERWAVE_SECRET_KEY");
+  const expectedHash = (await getSecret("flutterwave", "webhook_hash", "FLUTTERWAVE_WEBHOOK_HASH"));
+  const secretKey = (await getSecret("flutterwave", "secret_key", "FLUTTERWAVE_SECRET_KEY"));
   if (!expectedHash || !secretKey) {
     return new Response("Webhook not configured", { status: 500 });
   }
@@ -106,6 +107,18 @@ Deno.serve(async (req: Request) => {
       tenant_id: tenantId, transactionId, plan, cycle, expectedPrice, chargedAmount, chargedCurrency,
     });
     return new Response(JSON.stringify({ received: true, action: "amount_mismatch" }), { status: 200, headers: { "Content-Type": "application/json" } });
+  }
+
+  // Replay guard: the same Flutterwave tx_ref must only ever activate /
+  // extend a subscription once (verify and webhook both race for it).
+  // flutterwave_processed_tx_ref is set atomically by the first caller.
+  const { data: claimedFw } = await serviceClient.from("tenants")
+    .update({ flutterwave_processed_tx_ref: verified.data.tx_ref })
+    .eq("id", tenantId)
+    .or(`flutterwave_processed_tx_ref.is.null,flutterwave_processed_tx_ref.neq.${verified.data.tx_ref}`)
+    .select("id");
+  if (!claimedFw || claimedFw.length === 0) {
+    return new Response(JSON.stringify({ received: true, action: "already_processed" }), { status: 200, headers: { "Content-Type": "application/json" } });
   }
 
   const cardToken = verified.data.card?.token as string | undefined;

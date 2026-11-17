@@ -7,6 +7,7 @@ import AppLayout from './components/layout/AppLayout';
 import { ErrorBoundary, GlobalErrorListener } from './components/ui/ErrorMonitoring';
 import PremiumGate from './components/ui/PremiumGate';
 import { INVITE_STORAGE_KEY } from './pages/auth/AcceptInvitePage';
+import LogoLoader from './components/ui/LogoLoader';
 
 // Every page is loaded on demand (route-based code splitting) instead of
 // all being bundled into one giant chunk downloaded on first visit --
@@ -56,16 +57,11 @@ const TermsPage = lazy(() => import('./pages/footer/TermsPage'));
 const CookiePolicyPage = lazy(() => import('./pages/footer/CookiePolicyPage'));
 const RefundPolicyPage = lazy(() => import('./pages/footer/RefundPolicyPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const BlogIndexPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogIndexPage })));
+const BlogPostPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogPostPage })));
 
 function Spinner() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-10 h-10 border-4 border-[#0057D9] border-t-transparent rounded-full animate-spin" />
-        <span className="text-gray-500 text-sm">Chargement...</span>
-      </div>
-    </div>
-  );
+  return <LogoLoader />;
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -190,6 +186,10 @@ export default function App() {
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/cookies" element={<CookiePolicyPage />} />
         <Route path="/refund-policy" element={<RefundPolicyPage />} />
+        <Route path="/blog" element={<WithLang lang="fr"><BlogIndexPage /></WithLang>} />
+        <Route path="/blog/:slug" element={<WithLang lang="fr"><BlogPostPage /></WithLang>} />
+        <Route path="/en/blog" element={<WithLang lang="en"><BlogIndexPage /></WithLang>} />
+        <Route path="/en/blog/:slug" element={<WithLang lang="en"><BlogPostPage /></WithLang>} />
         <Route path="/en/about" element={<WithLang lang="en"><AboutPage /></WithLang>} />
         <Route path="/en/contact" element={<WithLang lang="en"><ContactPage /></WithLang>} />
         <Route path="/en/legal" element={<WithLang lang="en"><LegalPage /></WithLang>} />

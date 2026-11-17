@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { CheckCircle, ArrowUpRight, CreditCard, Calendar, Zap, Loader2 } from 'lucide-react';
+import { CheckCircle, ArrowUpRight, CreditCard, Calendar, Zap, Loader2, Smartphone } from 'lucide-react';
 import { useTenant } from '../../contexts/TenantContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -8,31 +8,14 @@ import { openPaddleCheckout } from '../../lib/paddleInline';
 import { format, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useState, useEffect } from 'react';
+import { usePublicIntegrations, resolvePspAvailability, publicConfig, PspId } from '../../lib/integrations';
 import toast from 'react-hot-toast';
 
-// Single source of truth for which PSP accounts are actually approved and
-// live right now. Flip a flag to true here (nowhere else) once that
-// provider's account is approved — this is what auto-selection and the
-// manual picker both check, so a not-yet-approved provider never gets
-// offered to a real customer even if its checkout code already exists.
-//
-// 5 PSPs total. All 5 are fully wired (checkout + verification code
-// exists and works) — the flags below are the only thing standing between
-// "code is ready" and "a real customer can pay with it". Flip one to true
-// once its secret key(s) are set in Supabase Edge Function secrets AND
-// the merchant account is approved:
-//   payunit:     PAYUNIT_API_USER, PAYUNIT_API_PASSWORD, PAYUNIT_API_KEY, PAYUNIT_MODE
-//   flutterwave: FLUTTERWAVE_SECRET_KEY (+ VITE_FLUTTERWAVE_PUBLIC_KEY at build time)
-//   paystack:    PAYSTACK_SECRET_KEY
-//   stripe:      STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SIGNING_SECRET (price computed inline, no STRIPE_PRICE_* needed)
-//   paddle:      PADDLE_WEBHOOK_SECRET (+ VITE_PADDLE_CLIENT_TOKEN and VITE_PADDLE_PRICE_* at build time)
-const PSP_AVAILABLE: Record<'payunit' | 'flutterwave' | 'paystack' | 'stripe' | 'paddle', boolean> = {
-  payunit: true,
-  flutterwave: false, // not yet approved — do not enable until confirmed
-  paystack: false,    // not yet approved — do not enable until confirmed
-  stripe: true,       // enabled — STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SIGNING_SECRET confirmed set, no Price ID catalog needed (price computed inline)
-  paddle: true,       // enabled — VITE_PADDLE_CLIENT_TOKEN, VITE_PADDLE_PRICE_*, PADDLE_WEBHOOK_SECRET, domain all confirmed set
-};
+// Disponibilité des PSP : pilotée depuis Super Admin > Intégrations
+// (platform_integrations, RPC get_public_integrations). Tant qu'aucun PSP
+// n'y est activé, PSP_DEFAULTS (lib/integrations.ts) garde exactement la
+// configuration historique (PayUnit, Stripe, Paddle) — rien ne casse.
+type Psp = PspId;
 
 // Live USD->XAF rate, same source (fx_rates, tenant_id IS NULL) that
 // supabase/functions/payunit-checkout now actually charges with — this
@@ -44,11 +27,12 @@ const PSP_AVAILABLE: Record<'payunit' | 'flutterwave' | 'paystack' | 'stripe' | 
 // in XAF specifically, regardless of what currency the tenant bills in.
 const FALLBACK_XAF_PER_USD = 610; // same fallback as payunit-checkout
 
+// Doit rester aligné sur PLAN_LIMITS (lib/countryData.ts) et sur la landing.
 const PLANS = [
-  { id: 'starter', name: 'Starter', price: 14, features: ['Facturation illimitée', 'Gestion stocks', '2 utilisateurs', 'Support email'] },
-  { id: 'pro', name: 'Pro', price: 29, features: ['Tout Starter', 'Banque & Mobile Money', 'WhatsApp', 'Multi-magasin', '5 utilisateurs'], popular: true },
-  { id: 'premium', name: 'Premium', price: 79, features: ['Tout Pro', 'IA Trésorerie & FX', 'OHADA complet', 'OCR & Paie', 'Factures récurrentes', 'Utilisateurs illimités'] },
-  { id: 'enterprise', name: 'Entreprise', price: 199, features: ['Tout Premium', 'Multi-société', 'API & intégrations', 'Support dédié 24/7', 'SLA 99.9%'] },
+  { id: 'starter', name: 'Starter', price: 14, features: ['Facturation illimitée & avoirs', 'Factures personnalisées (logo, couleurs)', 'Stocks multi-magasins', 'Rapports & TVA', '2 utilisateurs', 'Assistant IA Libooks'] },
+  { id: 'pro', name: 'Pro', price: 29, features: ['Tout Starter', 'Banque & Mobile Money', 'Rapprochement bancaire', 'WhatsApp', '5 utilisateurs'], popular: true },
+  { id: 'premium', name: 'Premium', price: 79, features: ['Tout Pro', 'Tableau de bord personnalisable', 'IA Trésorerie & FX', 'OHADA complet', 'Immobilisations', 'Factures récurrentes', 'Utilisateurs illimités'] },
+  { id: 'enterprise', name: 'Entreprise', price: 199, features: ['Tout Premium', 'Tableau de bord personnalisable', 'Multi-société', 'API & intégrations', 'Support dédié 24/7', 'SLA 99,9 %'] },
 ];
 
 // The "Facturation annuelle disponible avec 20% de réduction" line below
@@ -69,6 +53,9 @@ export default function Billing() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [fxRate, setFxRate] = useState<number | null>(null);
   const [payunitXafRate, setPayunitXafRate] = useState<number>(FALLBACK_XAF_PER_USD);
+  const { data: integrations } = usePublicIntegrations();
+  const PSP_AVAILABLE = resolvePspAvailability(integrations);
+  const pspCount = Object.values(PSP_AVAILABLE).filter(Boolean).length;
 
   useEffect(() => {
     (async () => {
@@ -106,12 +93,17 @@ export default function Billing() {
   // CEMAC/UEMOA franc zones when it's actually available; PayUnit
   // (card, international) otherwise. Never auto-select a provider whose
   // account isn't approved yet — falls through to whatever IS available.
-  function autoProvider(): 'payunit' | 'flutterwave' | 'paystack' | 'stripe' | 'paddle' {
+  function autoProvider(): Psp {
     const preferMomo = tenant?.currency === 'XAF' || tenant?.currency === 'XOF';
+    if (preferMomo && PSP_AVAILABLE.cinetpay) return 'cinetpay';
     if (preferMomo && PSP_AVAILABLE.flutterwave) return 'flutterwave';
+    if (['NGN', 'KES', 'GHS', 'ZAR', 'EGP'].includes(tenant?.currency ?? '') && PSP_AVAILABLE.korapay) return 'korapay';
     if (PSP_AVAILABLE.payunit) return 'payunit';
     if (PSP_AVAILABLE.flutterwave) return 'flutterwave';
     if (PSP_AVAILABLE.paystack) return 'paystack';
+    if (PSP_AVAILABLE.stripe) return 'stripe';
+    if (PSP_AVAILABLE.cinetpay) return 'cinetpay';
+    if (PSP_AVAILABLE.korapay) return 'korapay';
     return 'payunit'; // last resort — checkout will surface a clear error if truly none are configured
   }
 
@@ -202,9 +194,56 @@ export default function Billing() {
     }
   }, []);
 
-  async function handleCheckout(planId: string, provider: 'payunit' | 'flutterwave' | 'paystack' | 'stripe' | 'paddle') {
+  // CinetPay / Korapay : la vérification + activation est faite côté
+  // serveur (cinetpay-webhook / korapay-webhook) avant de revenir ici.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const psp = params.get('psp_return');
+    if (!psp) return;
+    const status = params.get('status');
+    window.history.replaceState({}, '', '/app/billing');
+    const name = psp === 'cinetpay' ? 'CinetPay' : 'Korapay';
+    if (status === 'activated' || status === 'already_processed') {
+      toast.success(`Paiement ${name} confirmé — ton forfait est activé !`);
+      setTimeout(() => window.location.reload(), 1500);
+    } else if (status === 'not_successful') {
+      toast.error(`Paiement ${name} non confirmé. Aucun montant n'a été validé.`);
+    } else if (status === 'mismatch') {
+      toast.error('Le montant payé ne correspond pas au forfait. Contacte le support.');
+    } else {
+      toast(`Paiement ${name} en cours de confirmation… Rafraîchis dans quelques instants.`);
+    }
+  }, []);
+
+  async function redirectCheckout(fn: string, planId: string) {
+    if (!tenant?.id) return;
+    setRedirecting(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${fn}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${session.session?.access_token}`,
+        },
+        body: JSON.stringify({ plan: planId, tenant_id: tenant.id, cycle: billingCycle }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Impossible de démarrer le paiement');
+      window.location.href = json.url;
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur de paiement');
+      setRedirecting(false);
+    }
+  }
+
+  async function handleCheckout(planId: string, provider: Psp) {
     if (!tenant?.id) return;
     setPickingPlanFor(null);
+
+    if (provider === 'cinetpay') return redirectCheckout('cinetpay-checkout', planId);
+    if (provider === 'korapay') return redirectCheckout('korapay-checkout', planId);
 
     if (provider === 'flutterwave') {
       // Inline checkout: opens as a modal over the current page, no
@@ -260,7 +299,7 @@ export default function Billing() {
             }
           },
           onclose: () => setRedirecting(false),
-        });
+        }, publicConfig(integrations, 'flutterwave').public_key);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Erreur de paiement');
         setRedirecting(false);
@@ -324,7 +363,9 @@ export default function Billing() {
       // for paddle-webhook (the source of truth); the checkout.completed
       // event here is only used to give the user immediate feedback.
       const priceEnvKey = `VITE_PADDLE_PRICE_${planId.toUpperCase()}${billingCycle === 'annual' ? '_ANNUAL' : ''}`;
-      const priceId = (import.meta.env as Record<string, string | undefined>)[priceEnvKey];
+      const paddleCfg = publicConfig(integrations, 'paddle');
+      const priceId = paddleCfg[`price_${planId}${billingCycle === 'annual' ? '_annual' : ''}`]
+        || (import.meta.env as Record<string, string | undefined>)[priceEnvKey];
       if (!priceId) {
         toast.error(`Le paiement par carte via Paddle n'est pas encore configuré pour ce forfait${billingCycle === 'annual' ? ' en facturation annuelle' : ''}.`);
         return;
@@ -358,6 +399,7 @@ export default function Billing() {
               setRedirecting(false);
             }
           },
+          paddleCfg.client_token,
         );
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Erreur de paiement');
@@ -428,7 +470,7 @@ export default function Billing() {
       return;
     }
     if (!tenant?.plan) return;
-    if (Object.values(PSP_AVAILABLE).filter(Boolean).length > 1) {
+    if (pspCount > 1) {
       setPickingPlanFor(tenant.plan);
     } else {
       handleCheckout(tenant.plan, autoProvider());
@@ -506,13 +548,13 @@ export default function Billing() {
           </div>
           <div className="sm:text-right">
             <p className="text-sm text-gray-400">Prix actuel</p>
-            <p className="text-xl sm:text-2xl font-medium text-gray-900">{displayPrice(tenant?.locked_price_usd ?? currentPlan?.price ?? 0)}<span className="text-sm font-normal text-gray-400">/mois</span></p>
+            <p className="text-xl sm:text-2xl font-medium text-gray-900 dark:text-white">{displayPrice(tenant?.locked_price_usd ?? currentPlan?.price ?? 0)}<span className="text-sm font-normal text-gray-400">/{tenant?.billing_cycle === 'annual' ? 'an' : 'mois'}</span></p>
           </div>
         </div>
 
         {isTrialing && trialDaysLeft <= 3 && (
-          <div className="mt-4 p-3 bg-amber-100 rounded-xl">
-            <p className="text-sm text-amber-800 font-medium">⚠ Votre essai expire bientôt. Souscrivez pour continuer à utiliser LiBooks.</p>
+          <div className="mt-4 p-3 bg-amber-100 dark:bg-amber-500/15 rounded-xl">
+            <p className="text-sm text-amber-800 dark:text-amber-300 font-medium">⚠ Votre essai expire bientôt. Souscrivez pour continuer à utiliser LiBooks.</p>
           </div>
         )}
       </div>
@@ -520,17 +562,17 @@ export default function Billing() {
       {/* Plans */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-          <h2 className="text-lg font-medium text-gray-900">Choisissez votre forfait</h2>
-          <div className="inline-flex rounded-xl border-2 border-gray-200 p-1 bg-gray-50">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white">Choisissez votre forfait</h2>
+          <div className="inline-flex rounded-xl border-2 border-gray-200 dark:border-surface-3 p-1 bg-gray-50 dark:bg-surface-2">
             <button
               onClick={() => setBillingCycle('monthly')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${billingCycle === 'monthly' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
+              className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${billingCycle === 'monthly' ? 'bg-white dark:bg-surface-1 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500'}`}
             >
               Mensuel
             </button>
             <button
               onClick={() => setBillingCycle('annual')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 ${billingCycle === 'annual' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}
+              className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 ${billingCycle === 'annual' ? 'bg-white dark:bg-surface-1 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500'}`}
             >
               Annuel
               <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">-20%</span>
@@ -543,8 +585,8 @@ export default function Billing() {
             return (
               <div
                 key={plan.id}
-                className={`relative bg-white rounded-2xl border-2 p-5 transition-all ${
-                  isCurrent ? 'border-[#0057D9]' : plan.popular ? 'border-blue-300 shadow-md' : 'border-gray-200'
+                className={`relative bg-white dark:bg-surface-1 rounded-2xl border-2 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
+                  isCurrent ? 'border-[#0057D9]' : plan.popular ? 'border-blue-300 dark:border-blue-500/50 shadow-md' : 'border-gray-200 dark:border-surface-3'
                 }`}
               >
                 {plan.popular && !isCurrent && (
@@ -553,21 +595,21 @@ export default function Billing() {
                 {isCurrent && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs bg-[#0057D9] text-white px-3 py-1 rounded-full">Actuel</span>
                 )}
-                <h3 className="text-base font-medium text-gray-900">{plan.name}</h3>
+                <h3 className="text-base font-medium text-gray-900 dark:text-white">{plan.name}</h3>
                 {billingCycle === 'annual' ? (
                   <>
-                    <p className="text-2xl font-medium text-gray-900 mt-1">
+                    <p className="text-2xl font-medium text-gray-900 dark:text-white mt-1">
                       {displayPrice(priceForCycle(plan.price, 'annual'))}
                       <span className="text-sm font-normal text-gray-400">/an</span>
                     </p>
                     <p className="text-xs text-gray-400 line-through">{displayPrice(plan.price * 12)}/an</p>
                   </>
                 ) : (
-                  <p className="text-2xl font-medium text-gray-900 mt-1">{displayPrice(plan.price)}<span className="text-sm font-normal text-gray-400">/mois</span></p>
+                  <p className="text-2xl font-medium text-gray-900 dark:text-white mt-1">{displayPrice(plan.price)}<span className="text-sm font-normal text-gray-400">/mois</span></p>
                 )}
                 <ul className="mt-3 space-y-1.5">
                   {plan.features.map(f => (
-                    <li key={f} className="flex items-start gap-1.5 text-xs text-gray-600">
+                    <li key={f} className="flex items-start gap-1.5 text-xs text-gray-600 dark:text-gray-400">
                       <CheckCircle className="w-3.5 h-3.5 text-[#0057D9] flex-shrink-0 mt-0.5" />
                       {f}
                     </li>
@@ -577,7 +619,7 @@ export default function Billing() {
                   <div className="mt-4 space-y-1.5">
                     <button
                       onClick={() => {
-                        if (Object.values(PSP_AVAILABLE).filter(Boolean).length > 1) {
+                        if (pspCount > 1) {
                           setPickingPlanFor(plan.id);
                         } else {
                           handleCheckout(plan.id, autoProvider());
@@ -602,7 +644,9 @@ export default function Billing() {
             PSP_AVAILABLE.paystack && 'carte bancaire (Paystack)',
             PSP_AVAILABLE.stripe && 'carte bancaire (Stripe)',
             PSP_AVAILABLE.paddle && 'carte bancaire (Paddle)',
-          ].filter(Boolean).join(' ou ')}.
+            PSP_AVAILABLE.cinetpay && 'Mobile Money (CinetPay)',
+            PSP_AVAILABLE.korapay && 'carte / Mobile Money (Korapay)',
+          ].filter(Boolean).join(', ')}.
         </p>
       </div>
 
@@ -626,18 +670,42 @@ export default function Billing() {
 
       {pickingPlanFor && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setPickingPlanFor(null)}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-medium text-gray-900 mb-1">Choisis ton moyen de paiement</h3>
+          <div className="bg-white dark:bg-surface-1 rounded-2xl shadow-xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">Choisis ton moyen de paiement</h3>
             <p className="text-sm text-gray-500 mb-5">Comment veux-tu payer ton abonnement {PLANS.find(p => p.id === pickingPlanFor)?.name} ?</p>
             <div className="space-y-3">
+              {PSP_AVAILABLE.cinetpay && (
+                <button
+                  onClick={() => handleCheckout(pickingPlanFor, 'cinetpay')}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 border-2 border-gray-200 dark:border-surface-3 rounded-xl hover:border-[#1BA548] transition-colors text-left"
+                >
+                  <div className="w-5 h-5 rounded flex items-center justify-center bg-[#1BA548] flex-shrink-0"><Smartphone className="w-3 h-3 text-white" /></div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">CinetPay</p>
+                    <p className="text-xs text-gray-400">Orange Money, MTN MoMo, Moov, Wave, cartes — {Math.round(priceForCycle(PLANS.find(p => p.id === pickingPlanFor)?.price ?? 0, billingCycle) * payunitXafRate).toLocaleString('fr-FR')} FCFA</p>
+                  </div>
+                </button>
+              )}
+              {PSP_AVAILABLE.korapay && (
+                <button
+                  onClick={() => handleCheckout(pickingPlanFor, 'korapay')}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 border-2 border-gray-200 dark:border-surface-3 rounded-xl hover:border-[#2376F3] transition-colors text-left"
+                >
+                  <div className="w-5 h-5 rounded flex items-center justify-center bg-[#2376F3] flex-shrink-0"><span className="text-[10px] font-bold text-white">K</span></div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">Korapay</p>
+                    <p className="text-xs text-gray-400">Carte, virement, Mobile Money — ≈ ${priceForCycle(PLANS.find(p => p.id === pickingPlanFor)?.price ?? 0, billingCycle)} en devise locale</p>
+                  </div>
+                </button>
+              )}
               {PSP_AVAILABLE.payunit && (
                 <button
                   onClick={() => handleCheckout(pickingPlanFor, 'payunit')}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 border-2 border-gray-200 rounded-xl hover:border-[#0057D9] transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3.5 border-2 border-gray-200 dark:border-surface-3 rounded-xl hover:border-[#0057D9] transition-colors text-left"
                 >
                   <CreditCard className="w-5 h-5 text-[#0057D9] flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">PayUnit</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">PayUnit</p>
                     <p className="text-xs text-gray-400">Carte bancaire — Visa, Mastercard — {Math.round(priceForCycle(PLANS.find(p => p.id === pickingPlanFor)?.price ?? 0, billingCycle) * payunitXafRate).toLocaleString('fr-FR')} FCFA</p>
                   </div>
                 </button>
@@ -645,11 +713,11 @@ export default function Billing() {
               {PSP_AVAILABLE.flutterwave && (
                 <button
                   onClick={() => handleCheckout(pickingPlanFor, 'flutterwave')}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 border-2 border-gray-200 rounded-xl hover:border-[#0057D9] transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3.5 border-2 border-gray-200 dark:border-surface-3 rounded-xl hover:border-[#0057D9] transition-colors text-left"
                 >
                   <Zap className="w-5 h-5 text-[#0057D9] flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Flutterwave</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">Flutterwave</p>
                     <p className="text-xs text-gray-400">Mobile Money / Carte locale — Orange Money, MTN MoMo, Airtel... — reste sur LiBooks</p>
                   </div>
                 </button>
@@ -657,11 +725,11 @@ export default function Billing() {
               {PSP_AVAILABLE.paystack && (
                 <button
                   onClick={() => handleCheckout(pickingPlanFor, 'paystack')}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 border-2 border-gray-200 rounded-xl hover:border-[#0057D9] transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3.5 border-2 border-gray-200 dark:border-surface-3 rounded-xl hover:border-[#0057D9] transition-colors text-left"
                 >
                   <CreditCard className="w-5 h-5 text-[#0057D9] flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Paystack</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">Paystack</p>
                     <p className="text-xs text-gray-400">Carte bancaire — Visa, Mastercard — ${priceForCycle(PLANS.find(p => p.id === pickingPlanFor)?.price ?? 0, billingCycle)}</p>
                   </div>
                 </button>
@@ -669,13 +737,13 @@ export default function Billing() {
               {PSP_AVAILABLE.stripe && (
                 <button
                   onClick={() => handleCheckout(pickingPlanFor, 'stripe')}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 border-2 border-gray-200 rounded-xl hover:border-[#635BFF] transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3.5 border-2 border-gray-200 dark:border-surface-3 rounded-xl hover:border-[#635BFF] transition-colors text-left"
                 >
                   <div className="w-5 h-5 rounded flex items-center justify-center bg-[#635BFF] flex-shrink-0">
                     <span className="text-[10px] font-bold text-white">S</span>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Stripe</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">Stripe</p>
                     <p className="text-xs text-gray-400">Carte bancaire — Visa, Mastercard, Amex — ${priceForCycle(PLANS.find(p => p.id === pickingPlanFor)?.price ?? 0, billingCycle)}</p>
                   </div>
                 </button>
@@ -683,13 +751,13 @@ export default function Billing() {
               {PSP_AVAILABLE.paddle && (
                 <button
                   onClick={() => handleCheckout(pickingPlanFor, 'paddle')}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 border-2 border-gray-200 rounded-xl hover:border-gray-900 transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3.5 border-2 border-gray-200 dark:border-surface-3 rounded-xl hover:border-gray-900 transition-colors text-left"
                 >
                   <div className="w-5 h-5 rounded flex items-center justify-center bg-gray-900 flex-shrink-0">
                     <span className="text-[10px] font-bold text-white">P</span>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Paddle</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">Paddle</p>
                     <p className="text-xs text-gray-400">Carte bancaire — Visa, Mastercard — ${priceForCycle(PLANS.find(p => p.id === pickingPlanFor)?.price ?? 0, billingCycle)}</p>
                   </div>
                 </button>

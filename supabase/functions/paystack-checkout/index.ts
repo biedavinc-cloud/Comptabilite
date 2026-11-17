@@ -17,6 +17,7 @@
 //   APP_URL                 - e.g. https://libooks.liafrik.com (for callback_url)
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
+import { getSecret } from "../_shared/integrations.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,7 +58,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 200, headers: corsHeaders });
 
   try {
-    const secretKey = Deno.env.get("PAYSTACK_SECRET_KEY");
+    const secretKey = (await getSecret("paystack", "secret_key", "PAYSTACK_SECRET_KEY"));
     if (!secretKey) throw new Error("PAYSTACK_SECRET_KEY is not configured");
 
     const authHeader = req.headers.get("Authorization") ?? "";

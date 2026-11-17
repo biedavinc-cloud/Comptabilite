@@ -11,6 +11,7 @@ import { format, isAfter } from 'date-fns';
 import Badge from '../../components/ui/Badge';
 import toast from 'react-hot-toast';
 import { v4 as uuidv4 } from 'uuid';
+import { resolveInvoiceSettings } from '../../lib/invoiceSettings';
 
 const STATUS_TABS: { key: InvoiceStatus | 'all'; label: string }[] = [
   { key: 'all', label: 'Toutes' },
@@ -204,7 +205,8 @@ export default function SalesInvoices() {
   });
 
   function resetForm() {
-    setFormData({ customer_id: '', warehouse_id: '', invoice_date: format(new Date(), 'yyyy-MM-dd'), due_date: '', payment_method: '', notes: '', terms: '' });
+    const inv = resolveInvoiceSettings(tenant?.invoice_settings);
+    setFormData({ customer_id: '', warehouse_id: '', invoice_date: format(new Date(), 'yyyy-MM-dd'), due_date: '', payment_method: '', notes: inv.default_notes, terms: inv.default_terms });
     setLines([{ id: uuidv4(), product_id: '', description: '', quantity: 1, unit_price: 0, discount_pct: 0, vat_rate: tenant?.vat_rate || 0 }]);
   }
 

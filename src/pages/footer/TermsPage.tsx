@@ -51,7 +51,7 @@ export default function TermsPage() {
                 <li><strong className="text-gray-900 dark:text-white">Platform</strong>: the LiBooks application accessible via the web.</li>
                 <li><strong className="text-gray-900 dark:text-white">User</strong>: any individual or legal entity that has created an account.</li>
                 <li><strong className="text-gray-900 dark:text-white">Plan</strong>: the subscribed plan (Starter, Pro, Premium, Enterprise).</li>
-                <li><strong className="text-gray-900 dark:text-white">Free trial</strong>: a 7-day trial period, no card required.</li>
+                <li><strong className="text-gray-900 dark:text-white">Free trial</strong>: a 30-day trial period, no card required.</li>
               </ul>
             </section>
 
@@ -82,7 +82,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">5. Free trial</h2>
               <p>
-                Every new user gets a 7-day free trial, giving access to all features of the selected plan.
+                Every new user gets a 30-day free trial, giving access to all features of the selected plan.
                 No card is required to sign up. When the trial ends, the account switches to read-only mode:
                 data remains viewable, but creating or editing anything is suspended until a paid subscription
                 is taken out.
@@ -191,7 +191,7 @@ export default function TermsPage() {
                 <li><strong className="text-gray-900 dark:text-white">Plateforme</strong> : l'application LiBooks accessible via le web.</li>
                 <li><strong className="text-gray-900 dark:text-white">Utilisateur</strong> : toute personne physique ou morale ayant créé un compte.</li>
                 <li><strong className="text-gray-900 dark:text-white">Forfait</strong> : l'abonnement souscrit (Starter, Pro, Premium, Entreprise).</li>
-                <li><strong className="text-gray-900 dark:text-white">Essai gratuit</strong> : période d'essai de 7 jours sans carte bancaire.</li>
+                <li><strong className="text-gray-900 dark:text-white">Essai gratuit</strong> : période d'essai de 30 jours sans carte bancaire.</li>
               </ul>
             </section>
 
@@ -222,7 +222,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">5. Essai gratuit</h2>
               <p>
-                Tout nouvel utilisateur bénéficie d'un essai gratuit de 7 jours, donnant accès à l'ensemble des
+                Tout nouvel utilisateur bénéficie d'un essai gratuit de 30 jours, donnant accès à l'ensemble des
                 fonctionnalités du forfait sélectionné. Aucune carte bancaire n'est requise pour s'inscrire.
                 À l'expiration de l'essai, le compte passe en mode lecture seule : les données restent
                 accessibles en consultation, mais la création et la modification sont suspendues jusqu'à la

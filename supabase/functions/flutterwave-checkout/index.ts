@@ -25,6 +25,7 @@
 // The returned plan `id` is what goes in FLUTTERWAVE_PLAN_STARTER etc.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
+import { getSecret } from "../_shared/integrations.ts";
 
 async function logFunctionError(functionName, error, context = {}) {
   try {
@@ -65,7 +66,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 200, headers: corsHeaders });
 
   try {
-    const secretKey = Deno.env.get("FLUTTERWAVE_SECRET_KEY");
+    const secretKey = (await getSecret("flutterwave", "secret_key", "FLUTTERWAVE_SECRET_KEY"));
     if (!secretKey) throw new Error("FLUTTERWAVE_SECRET_KEY is not configured");
 
     const authHeader = req.headers.get("Authorization") ?? "";

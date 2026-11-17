@@ -14,6 +14,7 @@
 // this endpoint has no logged-in user to authenticate as).
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
+import { getSecret } from "../_shared/integrations.ts";
 
 // Note on locked_price_usd: this charges what the tenant actually locked
 // in when they last paid/upgraded (tenants.locked_price_usd), NOT
@@ -51,7 +52,7 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
   }
 
-  const secretKey = Deno.env.get("FLUTTERWAVE_SECRET_KEY");
+  const secretKey = (await getSecret("flutterwave", "secret_key", "FLUTTERWAVE_SECRET_KEY"));
   if (!secretKey) {
     return new Response(JSON.stringify({ error: "FLUTTERWAVE_SECRET_KEY is not configured" }), { status: 500, headers: { "Content-Type": "application/json" } });
   }

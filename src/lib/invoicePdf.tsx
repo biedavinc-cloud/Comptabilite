@@ -1,4 +1,5 @@
 import { Document, Page, Text, View, Image, StyleSheet, Font } from '@react-pdf/renderer';
+import { resolveInvoiceSettings, LOGO_HEIGHT } from './invoiceSettings';
 
 Font.registerHyphenationCallback(word => [word]);
 
@@ -51,6 +52,7 @@ interface InvoicePdfProps {
     city?: string;
     phone_prefix?: string;
     bank_details?: Record<string, string>;
+    invoice_settings?: unknown;
   };
   invoice: {
     invoice_number: string;
@@ -96,23 +98,33 @@ interface InvoicePdfProps {
  * printed from the app, not a separate, out-of-sync template.
  */
 export function InvoicePdfDocument({ tenant, invoice, customer, items, formatCurrency, formatDate, statusLabel }: InvoicePdfProps) {
+  // Personnalisation (Paramètres > Factures) : couleurs, modèle, titre,
+  // logo, coordonnées, instructions de paiement, pied de page.
+  const cfg = resolveInvoiceSettings(tenant.invoice_settings);
+  const P = cfg.primary_color;
+  const A = cfg.accent_color;
+  const modern = cfg.template === 'modern';
+  const minimal = cfg.template === 'minimal';
+  const contact = [cfg.address, cfg.phone, cfg.email, cfg.website].filter(Boolean);
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <View style={styles.headerRow}>
+        {modern && <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 8, backgroundColor: A }} />}
+        <View style={[styles.headerRow, modern ? { backgroundColor: P, marginHorizontal: -40, marginTop: -32, paddingHorizontal: 40, paddingVertical: 22 } : {}]}>
           <View>
-            {tenant.logo_url && <Image src={tenant.logo_url} style={styles.logo} />}
-            <Text style={styles.companyName}>{tenant.name}</Text>
-            {tenant.legal_nif && <Text style={styles.legalLine}>NIF: {tenant.legal_nif}</Text>}
-            {tenant.legal_rccm && <Text style={styles.legalLine}>RCCM: {tenant.legal_rccm}</Text>}
-            {tenant.legal_regime && <Text style={styles.legalLine}>Régime: {tenant.legal_regime}</Text>}
+            {cfg.show_logo && tenant.logo_url && <Image src={tenant.logo_url} style={[styles.logo, { height: LOGO_HEIGHT[cfg.logo_size] }]} />}
+            <Text style={[styles.companyName, { color: modern ? '#ffffff' : P }]}>{tenant.name}</Text>
+            {tenant.legal_nif && <Text style={[styles.legalLine, modern ? { color: '#e5e7eb' } : {}]}>NIF: {tenant.legal_nif}</Text>}
+            {tenant.legal_rccm && <Text style={[styles.legalLine, modern ? { color: '#e5e7eb' } : {}]}>RCCM: {tenant.legal_rccm}</Text>}
+            {tenant.legal_regime && <Text style={[styles.legalLine, modern ? { color: '#e5e7eb' } : {}]}>Régime: {tenant.legal_regime}</Text>}
+            {contact.map((c) => <Text key={c} style={[styles.legalLine, modern ? { color: '#e5e7eb' } : {}]}>{c}</Text>)}
           </View>
           <View>
-            <Text style={styles.invoiceTitle}>FACTURE</Text>
-            <Text style={styles.invoiceNumber}>{invoice.invoice_number}</Text>
-            <Text style={styles.dateLine}>Date: {formatDate(invoice.invoice_date)}</Text>
-            {invoice.due_date && <Text style={styles.dateLine}>Échéance: {formatDate(invoice.due_date)}</Text>}
-            <Text style={styles.dateLine}>Statut: {statusLabel}</Text>
+            <Text style={[styles.invoiceTitle, { color: modern ? '#ffffff' : P }, minimal ? { fontSize: 16, letterSpacing: 2 } : {}]}>{cfg.title}</Text>
+            <Text style={[styles.invoiceNumber, { color: modern ? '#ffffff' : A }]}>{invoice.invoice_number}</Text>
+            <Text style={[styles.dateLine, modern ? { color: '#e5e7eb' } : {}]}>Date: {formatDate(invoice.invoice_date)}</Text>
+            {invoice.due_date && <Text style={[styles.dateLine, modern ? { color: '#e5e7eb' } : {}]}>Échéance: {formatDate(invoice.due_date)}</Text>}
+            <Text style={[styles.dateLine, modern ? { color: '#e5e7eb' } : {}]}>Statut: {statusLabel}</Text>
           </View>
         </View>
 
@@ -129,12 +141,12 @@ export function InvoicePdfDocument({ tenant, invoice, customer, items, formatCur
         )}
 
         <View style={styles.table}>
-          <View style={styles.tableHeader}>
-            <Text style={[styles.headerCell, styles.colDesc]}>Description</Text>
-            <Text style={[styles.headerCell, styles.colQty]}>Qté</Text>
-            <Text style={[styles.headerCell, styles.colPrice]}>Prix unit.</Text>
-            <Text style={[styles.headerCell, styles.colVat]}>TVA</Text>
-            <Text style={[styles.headerCell, styles.colTotal]}>Total TTC</Text>
+          <View style={[styles.tableHeader, { borderBottomColor: P }, modern ? { backgroundColor: `${A}14`, paddingTop: 6, paddingHorizontal: 4 } : {}]}>
+            <Text style={[styles.headerCell, { color: P }, styles.colDesc]}>Description</Text>
+            <Text style={[styles.headerCell, { color: P }, styles.colQty]}>Qté</Text>
+            <Text style={[styles.headerCell, { color: P }, styles.colPrice]}>Prix unit.</Text>
+            <Text style={[styles.headerCell, { color: P }, styles.colVat]}>TVA</Text>
+            <Text style={[styles.headerCell, { color: P }, styles.colTotal]}>Total TTC</Text>
           </View>
           {items.map((item, i) => (
             <View key={i} style={styles.tableRow}>
@@ -161,6 +173,12 @@ export function InvoicePdfDocument({ tenant, invoice, customer, items, formatCur
                 <Text style={styles.notesText}>{invoice.terms}</Text>
               </>
             )}
+            {cfg.payment_instructions && (
+              <>
+                <Text style={styles.notesLabel}>Modalités de paiement</Text>
+                <Text style={styles.notesText}>{cfg.payment_instructions}</Text>
+              </>
+            )}
             {tenant.bank_details?.iban && (
               <>
                 <Text style={styles.notesLabel}>Coordonnées bancaires</Text>
@@ -184,9 +202,9 @@ export function InvoicePdfDocument({ tenant, invoice, customer, items, formatCur
               <Text style={styles.totalLabel}>TVA</Text>
               <Text style={styles.totalValue}>{formatCurrency(invoice.vat_amount)}</Text>
             </View>
-            <View style={styles.grandTotalLine}>
-              <Text style={styles.grandTotalLabel}>Total TTC</Text>
-              <Text style={styles.grandTotalValue}>{formatCurrency(invoice.total)}</Text>
+            <View style={[styles.grandTotalLine, { borderTopColor: P }]}>
+              <Text style={[styles.grandTotalLabel, { color: P }]}>Total TTC</Text>
+              <Text style={[styles.grandTotalValue, { color: A }]}>{formatCurrency(invoice.total)}</Text>
             </View>
             {invoice.amount_paid > 0 && (
               <>
@@ -203,10 +221,15 @@ export function InvoicePdfDocument({ tenant, invoice, customer, items, formatCur
           </View>
         </View>
 
-        {tenant.cachet_url && <Image src={tenant.cachet_url} style={styles.stamp} />}
+        {cfg.show_stamp && tenant.cachet_url && (
+          <View style={{ alignSelf: 'flex-end', alignItems: 'center', marginTop: 24 }}>
+            {cfg.signature_label ? <Text style={styles.notesLabel}>{cfg.signature_label}</Text> : null}
+            <Image src={tenant.cachet_url} style={[styles.stamp, { marginTop: 4 }]} />
+          </View>
+        )}
 
         <Text style={styles.footer}>
-          {tenant.name}{tenant.legal_nif ? ` · NIF: ${tenant.legal_nif}` : ''}{tenant.city ? ` · ${tenant.city}` : ''}{tenant.phone_prefix ? ` · ${tenant.phone_prefix}` : ''}
+          {cfg.footer_text || `${tenant.name}${tenant.legal_nif ? ` · NIF: ${tenant.legal_nif}` : ''}${tenant.city ? ` · ${tenant.city}` : ''}${tenant.phone_prefix ? ` · ${tenant.phone_prefix}` : ''}`}
         </Text>
       </Page>
     </Document>

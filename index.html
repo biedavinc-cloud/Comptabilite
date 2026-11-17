@@ -6,7 +6,12 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     <meta name="theme-color" content="#0F2A3D" />
-    <meta name="description" content="LiBooks — Gestion comptable et commerciale internationale, avec une expertise OHADA reconnue. Facturation, stocks, Mobile Money, IA trésorerie." />
+    <meta name="description" content="LiBooks, le logiciel de comptabilité en ligne de référence en Afrique : facturation, stocks, SYSCOHADA/OHADA, Mobile Money, paie et IA. Essai gratuit 30 jours. Par LiAfrik Tech." />
+    <meta name="keywords" content="logiciel de comptabilité en ligne, logiciel comptabilité, comptabilité en ligne, logiciel de facturation, SYSCOHADA, OHADA, logiciel comptable Afrique, comptabilité Cameroun, comptabilité Sénégal, comptabilité Côte d'Ivoire, Mobile Money, gestion de stock, paie, LiBooks, LiAfrik" />
+    <meta name="author" content="LiAfrik Tech" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="application-name" content="LiBooks" />
+    <link rel="preconnect" href="https://flagcdn.com" crossorigin />
     <link rel="manifest" href="/manifest.json" />
     <!--
       Static <link rel="canonical"> for the homepage. usePageMeta.ts
@@ -30,12 +35,12 @@
     <link rel="alternate" hreflang="fr" href="https://libooks.liafrik.com/" />
     <link rel="alternate" hreflang="en" href="https://libooks.liafrik.com/en" />
     <link rel="alternate" hreflang="x-default" href="https://libooks.liafrik.com/" />
-    <title>LiBooks — Gestion comptable internationale</title>
+    <title>LiBooks — Logiciel de comptabilité en ligne pour l'Afrique | OHADA, Facturation, Mobile Money</title>
 
     <!-- Open Graph -->
     <meta property="og:site_name" content="LiBooks" />
-    <meta property="og:title" content="LiBooks — Gestion comptable internationale" />
-    <meta property="og:description" content="Gestion comptable et commerciale internationale, avec une expertise OHADA reconnue. Facturation, stocks, Mobile Money, IA trésorerie." />
+    <meta property="og:title" content="LiBooks — Logiciel de comptabilité en ligne pour l'Afrique | OHADA, Facturation, Mobile Money" />
+    <meta property="og:description" content="LiBooks, le logiciel de comptabilité en ligne de référence en Afrique : facturation, stocks, SYSCOHADA/OHADA, Mobile Money, paie et IA. Essai gratuit 30 jours. Par LiAfrik Tech." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://libooks.liafrik.com/" />
     <meta property="og:image" content="https://libooks.liafrik.com/logo-512.png" />
@@ -46,8 +51,8 @@
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="LiBooks — Gestion comptable internationale" />
-    <meta name="twitter:description" content="Gestion comptable et commerciale internationale, avec une expertise OHADA reconnue. Facturation, stocks, Mobile Money, IA trésorerie." />
+    <meta name="twitter:title" content="LiBooks — Logiciel de comptabilité en ligne pour l'Afrique | OHADA, Facturation, Mobile Money" />
+    <meta name="twitter:description" content="LiBooks, le logiciel de comptabilité en ligne de référence en Afrique : facturation, stocks, SYSCOHADA/OHADA, Mobile Money, paie et IA. Essai gratuit 30 jours. Par LiAfrik Tech." />
     <meta name="twitter:image" content="https://libooks.liafrik.com/logo-512.png" />
 
     <!-- Structured data: static (not injected via JS) so it's visible to
@@ -56,24 +61,56 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "LiBooks",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "description": "Gestion comptable et commerciale internationale, avec une expertise OHADA reconnue. Facturation, stocks, Mobile Money, IA trésorerie.",
-        "url": "https://libooks.liafrik.com/",
-        "offers": {
-          "@type": "AggregateOffer",
-          "priceCurrency": "USD",
-          "lowPrice": "14",
-          "highPrice": "199",
-          "offerCount": "4"
-        },
-        "publisher": {
-          "@type": "Organization",
-          "name": "LiAfrik",
-          "url": "https://liafrik.com"
-        }
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://liafrik.com/#org",
+            "name": "LiAfrik Tech",
+            "alternateName": "LiAfrik",
+            "url": "https://liafrik.com",
+            "logo": "https://libooks.liafrik.com/logo-512.png",
+            "email": "info@liafrik.com",
+            "address": [
+              { "@type": "PostalAddress", "addressLocality": "Dubaï", "addressCountry": "AE" },
+              { "@type": "PostalAddress", "addressLocality": "Yaoundé", "addressCountry": "CM" }
+            ],
+            "sameAs": [
+              "https://www.linkedin.com/company/liafrik/",
+              "https://www.instagram.com/liafrik_tech",
+              "https://www.facebook.com/share/1LMAGqsy3n/",
+              "https://youtube.com/@liyah-n",
+              "https://www.tiktok.com/@liyahgroup"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://libooks.liafrik.com/#website",
+            "url": "https://libooks.liafrik.com/",
+            "name": "LiBooks",
+            "inLanguage": ["fr", "en"],
+            "publisher": { "@id": "https://liafrik.com/#org" }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": "LiBooks",
+            "alternateName": "LiBooks — Logiciel de comptabilité en ligne",
+            "applicationCategory": "BusinessApplication",
+            "applicationSubCategory": "Accounting Software",
+            "operatingSystem": "Web, Android, iOS, Windows, macOS",
+            "description": "Logiciel de comptabilité et de gestion commerciale en ligne : facturation, stocks, SYSCOHADA/OHADA, Mobile Money, paie, IA trésorerie. Essai gratuit 30 jours.",
+            "url": "https://libooks.liafrik.com/",
+            "image": "https://libooks.liafrik.com/logo-512.png",
+            "featureList": "Facturation illimitée, Plan SYSCOHADA, TVA automatique, Gestion de stock multi-magasins, Mobile Money, Rapprochement bancaire, Paie, Immobilisations, Factures récurrentes, IA trésorerie, Assistant IA Libooks, Mode hors-ligne, API",
+            "offers": {
+              "@type": "AggregateOffer",
+              "priceCurrency": "USD",
+              "lowPrice": "14",
+              "highPrice": "199",
+              "offerCount": "4"
+            },
+            "publisher": { "@id": "https://liafrik.com/#org" }
+          }
+        ]
       }
     </script>
 
@@ -82,7 +119,32 @@
     <meta name="apple-mobile-web-app-title" content="LiBooks" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Pré-chargeur statique (remplacé par React au montage) : affiché
+           instantanément, avant le JS, autour du logo LiBooks. -->
+      <style>
+        #lb-boot{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fff;font-family:system-ui,sans-serif}
+        @media (prefers-color-scheme:dark){#lb-boot{background:#0a1620}}
+        #lb-boot .r{position:relative;width:96px;height:96px;display:flex;align-items:center;justify-content:center}
+        #lb-boot .ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 25%,#0057D9 45%,#22D3EE 60%,transparent 75%);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));animation:lbs 1.1s linear infinite}
+        #lb-boot .halo{position:absolute;inset:0;border-radius:50%;background:rgba(0,87,217,.2);animation:lbh 1.8s ease-out infinite}
+        #lb-boot img{width:48px;height:48px;position:relative;animation:lbp 1.6s ease-in-out infinite}
+        @keyframes lbs{to{transform:rotate(360deg)}}@keyframes lbh{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.8);opacity:0}}@keyframes lbp{50%{transform:scale(.92)}}
+      </style>
+      <div id="lb-boot"><div class="r"><span class="halo"></span><span class="ring"></span><img src="/logo-192.png" alt="LiBooks" /></div></div>
+    </div>
+    <noscript>
+      <h1>LiBooks — Logiciel de comptabilité en ligne pour l'Afrique</h1>
+      <p>Facturation, gestion de stock, comptabilité SYSCOHADA/OHADA, Mobile Money, paie et IA trésorerie. Essai gratuit de 30 jours, sans carte bancaire. Développé par LiAfrik Tech (Dubaï &amp; Afrique).</p>
+      <ul>
+        <li><a href="/signup">Créer un compte gratuit</a></li>
+        <li><a href="/blog">Blog : tech africaine, comptabilité et écosystème LiAfrik</a></li>
+        <li><a href="/about">À propos de LiBooks</a></li>
+        <li><a href="/help">Centre d'aide</a></li>
+        <li><a href="/developers">API développeurs</a></li>
+        <li><a href="/en">LiBooks in English</a></li>
+      </ul>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

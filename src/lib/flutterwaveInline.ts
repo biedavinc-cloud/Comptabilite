@@ -42,8 +42,10 @@ function loadFlutterwaveScript(): Promise<void> {
   return scriptLoadingPromise;
 }
 
-export async function openFlutterwaveInline(options: Omit<FlutterwaveInlineOptions, 'public_key'>): Promise<void> {
-  const publicKey = import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY;
+export async function openFlutterwaveInline(options: Omit<FlutterwaveInlineOptions, 'public_key'>, publicKeyOverride?: string): Promise<void> {
+  // Clé publique du back-office (Super Admin > Intégrations) en priorité,
+  // sinon la variable de build historique.
+  const publicKey = publicKeyOverride || import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY;
   if (!publicKey) {
     throw new Error("Le paiement Mobile Money n'est pas encore configuré (clé publique Flutterwave manquante).");
   }

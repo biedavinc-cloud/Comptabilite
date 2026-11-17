@@ -14,6 +14,7 @@
 // APP_URL, and CRON_SECRET (shared secret from the GitHub Actions workflow).
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
+import { getSecret } from "../_shared/integrations.ts";
 
 const NOTIFY_FROM = "LiBooks <noreply@liafrik.com>";
 
@@ -61,7 +62,7 @@ Deno.serve(async (req: Request) => {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
   }
 
-  const resendKey = Deno.env.get("RESEND_API_KEY");
+  const resendKey = (await getSecret("resend", "api_key", "RESEND_API_KEY"));
   const appUrl = Deno.env.get("APP_URL") ?? "https://libooks.liafrik.com";
   const serviceClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 

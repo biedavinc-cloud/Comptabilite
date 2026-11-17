@@ -7,6 +7,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
 import Stripe from "npm:stripe@17";
+import { getSecret } from "../_shared/integrations.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,7 +19,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 200, headers: corsHeaders });
 
   try {
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    const stripeKey = (await getSecret("stripe", "secret_key", "STRIPE_SECRET_KEY"));
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not configured");
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-06-20" });
 

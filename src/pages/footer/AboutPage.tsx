@@ -186,7 +186,7 @@ export default function AboutPage() {
           >
             {isEn ? 'Start for free' : 'Commencer gratuitement'}
           </Link>
-          <p className="text-xs text-gray-400 mt-3">{isEn ? '7-day free trial, no card required.' : "7 jours d'essai gratuit, sans carte bancaire."}</p>
+          <p className="text-xs text-gray-400 mt-3">{isEn ? '30-day free trial, no card required.' : "30 jours d'essai gratuit, sans carte bancaire."}</p>
         </div>
       </div>
 

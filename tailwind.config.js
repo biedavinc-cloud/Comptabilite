@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Glacial Indifference"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['"Outfit Variable"', 'Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
         // Dark mode surface tokens for consistent use across the app
