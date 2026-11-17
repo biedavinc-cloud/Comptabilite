@@ -44,7 +44,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">1. Data controller</h2>
               <p>
-                LiAfrik (Dubai, UAE & Yaoundé, Cameroon) is the controller for personal data collected on
+                Liafrik (Dubai, UAE & Yaoundé, Cameroon) is the controller for personal data collected on
                 the LiBooks platform. For any question:
                 <a href="mailto:info@liafrik.com" className="text-[#0057D9] hover:underline"> info@liafrik.com</a>.
               </p>
@@ -141,7 +141,7 @@ export default function PrivacyPage() {
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">9. Transfers outside the EU/EEA</h2>
               <p>
                 Data may be processed from Dubai (UAE) as part of the platform's development and maintenance.
-                LiAfrik ensures an adequate level of protection in line with the appropriate safeguards
+                Liafrik ensures an adequate level of protection in line with the appropriate safeguards
                 provided for by GDPR (standard contractual clauses, technical and organizational measures).
               </p>
             </section>
@@ -167,7 +167,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">1. Responsable du traitement</h2>
               <p>
-                LiAfrik (Dubaï, EAU & Yaoundé, Cameroun) est responsable du traitement des données
+                Liafrik (Dubaï, EAU & Yaoundé, Cameroun) est responsable du traitement des données
                 personnelles collectées sur la plateforme LiBooks. Pour toute question :
                 <a href="mailto:info@liafrik.com" className="text-[#0057D9] hover:underline"> info@liafrik.com</a>.
               </p>
@@ -264,7 +264,7 @@ export default function PrivacyPage() {
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">9. Transferts de données hors UE/CEE</h2>
               <p>
                 Les données peuvent être traitées depuis Dubaï (EAU) dans le cadre du développement et de la
-                maintenance de la plateforme. LiAfrik garantit un niveau de protection adéquat conformément
+                maintenance de la plateforme. Liafrik garantit un niveau de protection adéquat conformément
                 aux garanties appropriées prévues par le RGPD (clauses contractuelles types, mesures techniques
                 et organisationnelles).
               </p>
@@ -292,9 +292,9 @@ export default function PrivacyPage() {
       <footer className="border-t border-gray-100 dark:border-surface-3 py-8">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-sm text-gray-400">
-            LiBooks {isEn ? 'is built by' : 'est développé par'} <span className="font-medium text-gray-600 dark:text-gray-300">LiAfrik</span> — Dubai & Yaoundé
+            LiBooks {isEn ? 'is built by' : 'est développé par'} <span className="font-medium text-gray-600 dark:text-gray-300">Liafrik</span> — Dubai & Yaoundé
           </p>
-          <p className="text-xs text-gray-400 mt-1">© {new Date().getFullYear()} LiAfrik. {isEn ? 'All rights reserved.' : 'Tous droits réservés.'}</p>
+          <p className="text-xs text-gray-400 mt-1">© {new Date().getFullYear()} Liafrik. {isEn ? 'All rights reserved.' : 'Tous droits réservés.'}</p>
         </div>
       </footer>
     </div>

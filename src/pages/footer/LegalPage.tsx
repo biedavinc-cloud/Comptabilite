@@ -10,7 +10,7 @@ export default function LegalPage() {
   const isEn = i18n.language === 'en';
   usePageMeta(
     isEn ? 'Legal Notice' : 'Mentions légales',
-    isEn ? "LiBooks' legal notice, published by LiAfrik." : "Mentions légales de LiBooks, édité par LiAfrik."
+    isEn ? "LiBooks' legal notice, published by Liafrik." : "Mentions légales de LiBooks, édité par Liafrik."
   );
   return (
     <div className="min-h-screen bg-white dark:bg-surface-0">
@@ -40,7 +40,7 @@ export default function LegalPage() {
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">1. Platform publisher</h2>
               <p>The LiBooks platform is published by:</p>
               <ul className="mt-2 space-y-1 list-disc list-inside">
-                <li><strong className="text-gray-900 dark:text-white">LiAfrik</strong></li>
+                <li><strong className="text-gray-900 dark:text-white">Liafrik</strong></li>
                 <li>Dubai, United Arab Emirates</li>
                 <li>Yaoundé, Cameroon</li>
                 <li>Email: <a href="mailto:info@liafrik.com" className="text-[#0057D9] hover:underline">info@liafrik.com</a></li>
@@ -49,7 +49,7 @@ export default function LegalPage() {
 
             <section>
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">2. Publication director</h2>
-              <p>The publication director is LiAfrik's legal representative.</p>
+              <p>The publication director is Liafrik's legal representative.</p>
             </section>
 
             <section>
@@ -65,19 +65,19 @@ export default function LegalPage() {
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">4. Intellectual property</h2>
               <p>
                 All content on the LiBooks platform (text, logos, graphics, software, interfaces, the
-                built-in SYSCOHADA chart of accounts) is the exclusive property of LiAfrik, unless stated
+                built-in SYSCOHADA chart of accounts) is the exclusive property of Liafrik, unless stated
                 otherwise. Any reproduction, representation, modification or use, in whole or in part,
                 without prior written authorization is prohibited.
               </p>
               <p className="mt-2">
-                The LiAfrik and LiBooks trade names, trademarks and logos are protected.
+                The Liafrik and LiBooks trade names, trademarks and logos are protected.
               </p>
             </section>
 
             <section>
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">5. Liability</h2>
               <p>
-                LiAfrik strives to provide an accessible, functional platform around the clock, but cannot
+                Liafrik strives to provide an accessible, functional platform around the clock, but cannot
                 be held liable for service interruptions due to force majeure, network failures, or
                 maintenance operations.
               </p>
@@ -90,7 +90,7 @@ export default function LegalPage() {
             <section>
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">6. Hyperlinks</h2>
               <p>
-                The platform may contain links to third-party sites. LiAfrik exercises no control over
+                The platform may contain links to third-party sites. Liafrik exercises no control over
                 these sites and disclaims all liability for their content.
               </p>
             </section>
@@ -111,7 +111,7 @@ export default function LegalPage() {
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">1. Éditeur de la plateforme</h2>
               <p>La plateforme LiBooks est éditée par :</p>
               <ul className="mt-2 space-y-1 list-disc list-inside">
-                <li><strong className="text-gray-900 dark:text-white">LiAfrik</strong></li>
+                <li><strong className="text-gray-900 dark:text-white">Liafrik</strong></li>
                 <li>Dubaï, Émirats Arabes Unis</li>
                 <li>Yaoundé, Cameroun</li>
                 <li>Email : <a href="mailto:info@liafrik.com" className="text-[#0057D9] hover:underline">info@liafrik.com</a></li>
@@ -120,7 +120,7 @@ export default function LegalPage() {
 
             <section>
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">2. Directeur de la publication</h2>
-              <p>Le directeur de la publication est le représentant légal de LiAfrik.</p>
+              <p>Le directeur de la publication est le représentant légal de Liafrik.</p>
             </section>
 
             <section>
@@ -136,19 +136,19 @@ export default function LegalPage() {
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">4. Propriété intellectuelle</h2>
               <p>
                 L'ensemble des contenus présents sur la plateforme LiBooks (textes, logos, graphismes,
-                logiciels, interfaces, plan comptable SYSCOHADA intégré) est la propriété exclusive de LiAfrik,
+                logiciels, interfaces, plan comptable SYSCOHADA intégré) est la propriété exclusive de Liafrik,
                 sauf mention contraire. Toute reproduction, représentation, modification ou exploitation,
                 totale ou partielle, sans autorisation écrite préalable est interdite.
               </p>
               <p className="mt-2">
-                Les noms commerciaux, marques et logos LiAfrik et LiBooks sont protégés.
+                Les noms commerciaux, marques et logos Liafrik et LiBooks sont protégés.
               </p>
             </section>
 
             <section>
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">5. Responsabilité</h2>
               <p>
-                LiAfrik s'efforce de fournir une plateforme accessible et fonctionnelle 24h/24, mais ne
+                Liafrik s'efforce de fournir une plateforme accessible et fonctionnelle 24h/24, mais ne
                 saurait être tenue responsable des interruptions de service dues à des événements de force
                 majeure, des pannes de réseau ou des opérations de maintenance.
               </p>
@@ -161,7 +161,7 @@ export default function LegalPage() {
             <section>
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">6. Liens hypertextes</h2>
               <p>
-                La plateforme peut contenir des liens vers des sites tiers. LiAfrik n'exerce aucun contrôle
+                La plateforme peut contenir des liens vers des sites tiers. Liafrik n'exerce aucun contrôle
                 sur ces sites et décline toute responsabilité quant à leur contenu.
               </p>
             </section>
@@ -182,9 +182,9 @@ export default function LegalPage() {
       <footer className="border-t border-gray-100 dark:border-surface-3 py-8">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-sm text-gray-400">
-            LiBooks {isEn ? 'is built by' : 'est développé par'} <span className="font-medium text-gray-600 dark:text-gray-300">LiAfrik</span> — Dubai & Yaoundé
+            LiBooks {isEn ? 'is built by' : 'est développé par'} <span className="font-medium text-gray-600 dark:text-gray-300">Liafrik</span> — Dubai & Yaoundé
           </p>
-          <p className="text-xs text-gray-400 mt-1">© {new Date().getFullYear()} LiAfrik. {isEn ? 'All rights reserved.' : 'Tous droits réservés.'}</p>
+          <p className="text-xs text-gray-400 mt-1">© {new Date().getFullYear()} Liafrik. {isEn ? 'All rights reserved.' : 'Tous droits réservés.'}</p>
         </div>
       </footer>
     </div>

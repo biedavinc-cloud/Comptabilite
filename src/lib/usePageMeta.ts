@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 const SITE_NAME = 'LiBooks';
 const SITE_URL = 'https://libooks.liafrik.com';
 const DEFAULT_TITLE = `${SITE_NAME} — Logiciel de comptabilité en ligne pour l'Afrique | OHADA, Facturation, Mobile Money`;
-const DEFAULT_DESCRIPTION = "LiBooks, le logiciel de comptabilité en ligne de référence en Afrique : facturation, stocks, SYSCOHADA/OHADA, Mobile Money, paie et IA. Essai gratuit 30 jours. Par LiAfrik Tech.";
+const DEFAULT_DESCRIPTION = "LiBooks, le logiciel de comptabilité en ligne de référence en Afrique : facturation, stocks, SYSCOHADA/OHADA, Mobile Money, paie et IA. Essai gratuit 30 jours. Par Liafrik Tech.";
 
 /**
  * Sets the document title, meta description, canonical link, and

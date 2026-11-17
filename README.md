@@ -1,6 +1,6 @@
 # LiBooks — Logiciel de comptabilité en ligne pour l'Afrique
 
-Dev by **LiAfrik Tech** (Vincent Nogue, CEO) — www.liafrik.com
+Dev by **Liafrik Tech** (Vincent Nogue, CEO) — www.liafrik.com
 
 Stack : React + Vite + Tailwind · Supabase (Postgres/RLS, Edge Functions) · Cloudflare Pages · Resend.
 

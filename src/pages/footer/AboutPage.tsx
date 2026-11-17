@@ -36,8 +36,8 @@ export default function AboutPage() {
   usePageMeta(
     isEn ? 'About' : 'À propos',
     isEn
-      ? "LiBooks is built by LiAfrik, a technology group with a dual Dubai and Africa presence. Discover our story and our mission."
-      : "LiBooks est développé par LiAfrik, un groupe technologique à double présence Dubaï et Afrique. Découvrez notre histoire et notre mission."
+      ? "LiBooks is built by Liafrik, a technology group with a dual Dubai and Africa presence. Discover our story and our mission."
+      : "LiBooks est développé par Liafrik, un groupe technologique à double présence Dubaï et Afrique. Découvrez notre histoire et notre mission."
   );
   const values = isEn ? VALUES_EN : VALUES_FR;
   const stats = isEn ? STATS_EN : STATS_FR;
@@ -113,19 +113,19 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* LiAfrik */}
+        {/* Liafrik */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-[#0057D9]/10 dark:bg-[#0057D9]/20 rounded-xl flex items-center justify-center">
               <Globe2 className="w-5 h-5 text-[#0057D9]" />
             </div>
-            <h2 className="text-xl font-medium text-gray-900 dark:text-white">{isEn ? 'LiAfrik — the publisher' : "LiAfrik — l'éditeur"}</h2>
+            <h2 className="text-xl font-medium text-gray-900 dark:text-white">{isEn ? 'Liafrik — the publisher' : "Liafrik — l'éditeur"}</h2>
           </div>
           <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-surface-1 dark:to-surface-2 rounded-2xl p-6 border border-gray-100 dark:border-surface-3">
             {isEn ? (
               <>
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
-                  LiBooks is published by <strong className="text-gray-900 dark:text-white">LiAfrik</strong>,
+                  LiBooks is published by <strong className="text-gray-900 dark:text-white">Liafrik</strong>,
                   a technology group with a dual presence in <strong className="text-gray-900 dark:text-white">Dubai (UAE)</strong> and
                   <strong className="text-gray-900 dark:text-white"> Africa</strong>. That dual anchor
                   is no accident — it's our identity.
@@ -145,7 +145,7 @@ export default function AboutPage() {
             ) : (
               <>
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
-                  LiBooks est édité par <strong className="text-gray-900 dark:text-white">LiAfrik</strong>,
+                  LiBooks est édité par <strong className="text-gray-900 dark:text-white">Liafrik</strong>,
                   un groupe technologique à la double présence <strong className="text-gray-900 dark:text-white">Dubaï (EAU)</strong> et
                   <strong className="text-gray-900 dark:text-white"> Afrique</strong>. Cette double ancrage
                   n'est pas un hasard — c'est notre identité.
@@ -194,9 +194,9 @@ export default function AboutPage() {
       <footer className="border-t border-gray-100 dark:border-surface-3 py-8">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-sm text-gray-400">
-            LiBooks {isEn ? 'is built by' : 'est développé par'} <span className="font-medium text-gray-600 dark:text-gray-300">LiAfrik</span> — Dubai & Yaoundé
+            LiBooks {isEn ? 'is built by' : 'est développé par'} <span className="font-medium text-gray-600 dark:text-gray-300">Liafrik</span> — Dubai & Yaoundé
           </p>
-          <p className="text-xs text-gray-400 mt-1">© {new Date().getFullYear()} LiAfrik. {isEn ? 'All rights reserved.' : 'Tous droits réservés.'}</p>
+          <p className="text-xs text-gray-400 mt-1">© {new Date().getFullYear()} Liafrik. {isEn ? 'All rights reserved.' : 'Tous droits réservés.'}</p>
         </div>
       </footer>
     </div>

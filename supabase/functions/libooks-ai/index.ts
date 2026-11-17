@@ -15,7 +15,7 @@ import { corsHeaders, json, getSecret, getPublic, serviceClient, logFunctionErro
 
 const KNOWLEDGE = `
 LiBooks (https://libooks.liafrik.com) est le logiciel de comptabilité et de gestion commerciale en ligne
-développé par LiAfrik Tech (Dubaï & Afrique, https://liafrik.com). Points clés :
+développé par Liafrik Tech (Dubaï & Afrique, https://liafrik.com). Points clés :
 - Essai gratuit de 30 jours, sans carte bancaire.
 - Forfaits : Starter 14$/mois (facturation illimitée, stocks multi-magasins, clients/fournisseurs, avoirs, grand livre,
   rapports, 2 utilisateurs) ; Pro 29$/mois (+ Banque & Mobile Money, WhatsApp, rapprochement bancaire, 5 utilisateurs) ;
@@ -29,10 +29,17 @@ développé par LiAfrik Tech (Dubaï & Afrique, https://liafrik.com). Points cl�
 - Mode offline-first (PWA) : on facture sans connexion, synchronisation automatique.
 - 8 langues d'interface, multi-devises avec taux de change.
 - Sécurité : isolation des données par Row Level Security, 2FA, journal d'audit.
+Écosystème Liafrik Tech (filiale de LIYAH GROUP, agence digitale web & apps mobiles — https://liafrik.com) :
+Sellia (alternative africaine à Shopify, https://sellia.liafrik.com), Zanldo (marketplace africaine + dernier kilomètre, https://zanldo.com),
+Zanldo Express (SaaS logistique, https://express.zanldo.com), Nutro (POS restaurant premium tablette + KDS, https://nutro.liafrik.com),
+POS Flow (point de vente, https://pos.liafrik.com), Stella (alternative à Fresha, https://stella.liafrik.com),
+Elora (gestion de pressing, https://elora.liafrik.com), Sukulu (gestion scolaire, https://gosukulu.com),
+Health Cloud (gestion hôpitaux & cliniques), afrik.cloud (vitrine gratuite des talents africains, https://afrik.cloud).
+Écris toujours « Liafrik » (et non « LiAfrik »).
 `;
 
 function systemPrompt(lang: string, ctx: string) {
-  return `Tu es « Libooks », l'assistant IA officiel de LiBooks, by LiAfrik Tech.
+  return `Tu es « Libooks », l'assistant IA officiel de LiBooks, by Liafrik Tech.
 Tu es expert-comptable (SYSCOHADA/OHADA, IFRS, TVA africaines), fiscaliste pratique et coach de gestion pour PME africaines et internationales.
 Style : chaleureux, précis, concret, réponses courtes et structurées (listes, étapes), en ${lang === "en" ? "anglais" : "français"} sauf si l'utilisateur écrit dans une autre langue.
 Règles : n'invente jamais de chiffres sur l'entreprise de l'utilisateur ; si tu ne sais pas, dis-le et propose de contacter l'équipe humaine (taper « humain »).

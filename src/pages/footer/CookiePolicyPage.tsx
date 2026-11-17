@@ -139,9 +139,9 @@ export default function CookiePolicyPage() {
       <footer className="border-t border-gray-100 dark:border-surface-3 py-8">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-sm text-gray-400">
-            LiBooks {isEn ? 'is built by' : 'est développé par'} <span className="font-medium text-gray-600 dark:text-gray-300">LiAfrik</span> — Dubai & Yaoundé
+            LiBooks {isEn ? 'is built by' : 'est développé par'} <span className="font-medium text-gray-600 dark:text-gray-300">Liafrik</span> — Dubai & Yaoundé
           </p>
-          <p className="text-xs text-gray-400 mt-1">© {new Date().getFullYear()} LiAfrik. {isEn ? 'All rights reserved.' : 'Tous droits réservés.'}</p>
+          <p className="text-xs text-gray-400 mt-1">© {new Date().getFullYear()} Liafrik. {isEn ? 'All rights reserved.' : 'Tous droits réservés.'}</p>
         </div>
       </footer>
     </div>

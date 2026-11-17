@@ -208,3 +208,29 @@ body {
   .lb-aurora, .lb-gradient-text, .lb-shine-border::after, .lb-float, .lb-float-slow, .lb-marquee,
   .lb-loader-ring, .lb-loader-logo, .lb-loader-halo, .lb-bar { animation: none !important; }
 }
+
+/* ---------- CMS : éditeur riche ---------- */
+.lb-editor:empty::before { content: attr(data-placeholder); color: #9ca3af; pointer-events: none; }
+.lb-prose figure { margin: 1.6rem 0; }
+.lb-prose img { border-radius: 1rem; max-width: 100%; height: auto; }
+.lb-prose figcaption { text-align: center; font-size: .85rem; color: #9ca3af; margin-top: .5rem; }
+.lb-prose hr { border: 0; height: 1px; background: linear-gradient(90deg, transparent, #cbd5e1, transparent); margin: 2rem 0; }
+.lb-prose pre { background: #0F2A3D; color: #e2e8f0; padding: 1rem 1.2rem; border-radius: .9rem; overflow-x: auto; font-size: .9rem; margin: 1.2rem 0; }
+.lb-prose code { background: rgba(0,87,217,.08); padding: .1rem .35rem; border-radius: .35rem; font-size: .9em; }
+.lb-prose pre code { background: transparent; padding: 0; }
+.lb-prose mark, .lb-prose span[style*="background-color"] { border-radius: .25rem; padding: 0 .15rem; }
+.lb-prose u { text-underline-offset: 3px; }
+
+/* ---------- Showcase (sections signature) ---------- */
+@keyframes lb-row-in { from { transform: translateY(-14px); opacity: 0; filter: blur(4px); } to { transform: none; opacity: 1; filter: none; } }
+@property --wx { syntax: '<percentage>'; initial-value: 80%; inherits: true; }
+@keyframes lb-wm { 0% { --wx: 10%; } 100% { --wx: 90%; } }
+.lb-watermark {
+  background:
+    radial-gradient(30% 140% at var(--wx) 100%, rgba(255,255,255,.85) 0%, rgba(147,197,253,.45) 35%, rgba(255,255,255,.06) 70%),
+    linear-gradient(rgba(255,255,255,.06), rgba(255,255,255,.06));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: lb-wm 10s ease-in-out infinite alternate;
+  font-family: 'Outfit', 'Outfit Variable', sans-serif;
+}
+@media (prefers-reduced-motion: reduce) { .lb-watermark { animation: none; } }

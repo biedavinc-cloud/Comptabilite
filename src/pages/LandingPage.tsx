@@ -17,7 +17,11 @@ import {
   Facebook, Instagram, Linkedin, Youtube, LayoutDashboard, Rocket, BookOpen
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { PLAN_LIMITS, MODULES, ModuleKey, COUNTRIES } from '../lib/countryData';
+import { PLAN_LIMITS, MODULES, ModuleKey, COUNTRIES, COMMON_CURRENCIES } from '../lib/countryData';
+import {
+  RotatingWord, LiveFeedCard, StatementSection, UseCaseCards, StickyFeatures, CoverageSection,
+  PinnedCardStack, EcosystemSection, RotatingBadge, FooterWatermark,
+} from '../components/landing/Showcase';
 import {
   Reveal, SplitText, CountUp, Magnetic, ScrollProgress, useSpotlight, useParallax, GiantScrollText,
 } from '../components/ui/Motion';
@@ -349,6 +353,10 @@ export default function LandingPage() {
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-[1.1] tracking-tight mb-6">
               <SplitText text={t('landing.heroTitle')} /><br />
               <SplitText text={t('landing.heroTitleAccent')} wordClassName="lb-gradient-text" delay={250} />
+              <span className="block mt-2 text-[0.62em] font-light text-gray-800 dark:text-white/90 tracking-tight">
+                {isEn ? 'Get paid in' : 'Encaissez en'}{' '}
+                <RotatingWord words={['XAF', 'XOF', 'NGN', 'KES', 'USD', 'EUR', 'GHS', 'MAD']} className="font-bold text-[#0057D9]" />
+              </span>
             </h1>
 
             <Reveal delay={450}>
@@ -421,7 +429,10 @@ export default function LandingPage() {
                 <p className="text-xs text-gray-500 dark:text-gray-400">Réponse en 2 secondes</p>
               </div>
             </div>
-            <div className="absolute -bottom-4 -left-4 bg-white dark:bg-surface-1 rounded-2xl shadow-xl ring-1 ring-gray-100 dark:ring-0 p-4 flex items-center gap-3 lb-float">
+            <div className="absolute -bottom-24 -left-28 w-[300px] lb-float-slow hidden xl:block z-10">
+              <LiveFeedCard />
+            </div>
+            <div className="absolute -bottom-4 -left-4 bg-white dark:bg-surface-1 rounded-2xl shadow-xl ring-1 ring-gray-100 dark:ring-0 p-4 flex items-center gap-3 lb-float xl:hidden">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: GREEN }}>
                 <Wifi className="w-5 h-5 text-white" />
               </div>
@@ -429,7 +440,7 @@ export default function LandingPage() {
                 <p className="text-sm font-medium text-gray-900 dark:text-white">Mode offline</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Synchronisé automatiquement</p>
               </div>
-            </div>
+</div>
           </div>
         </div>
 
@@ -478,6 +489,8 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <StatementSection countries={COUNTRIES.length} currencies={COMMON_CURRENCIES.length} />
+
       {/* ===== PENSÉ POUR L'AFRIQUE ===== */}
       <section className="py-20 bg-gray-50 dark:bg-surface-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -525,6 +538,8 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <UseCaseCards />
+
       {/* ===== MODULES ===== */}
       <section id="modules" className="py-20 bg-white dark:bg-surface-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -562,6 +577,12 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      <StickyFeatures />
+
+      <CoverageSection countries={COUNTRIES.length} currencies={COMMON_CURRENCIES.length} />
+
+      <PinnedCardStack />
 
       {/* ===== PRICING ===== */}
       <section id="pricing" className="py-20 bg-gray-50 dark:bg-surface-0">
@@ -788,6 +809,8 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <EcosystemSection />
+
       {/* ===== CTA ===== */}
       <section className="relative py-24 overflow-hidden" style={{ background: NAVY }}>
         <div className="absolute inset-0 opacity-60 pointer-events-none" style={{ background: 'radial-gradient(50% 60% at 50% 0%, rgba(0,87,217,.45), transparent 70%)' }} />
@@ -819,13 +842,13 @@ export default function LandingPage() {
           { words: [{ text: 'COMPTABILITÉ', outline: true }, { text: 'AFRICAINE' }, { text: 'DE', outline: true }, { text: 'RÉFÉRENCE', accent: true }] },
           { words: [{ text: 'FACTURER' }, { text: 'ENCAISSER', outline: true }, { text: 'PILOTER', accent: true }, { text: 'GRANDIR', outline: true }] },
         ]} />
-        <p className="sr-only">LiBooks, développé par LiAfrik Tech — la comptabilité africaine de référence.</p>
+        <p className="sr-only">LiBooks, développé par Liafrik Tech — la comptabilité africaine de référence.</p>
       </section>
 
       <FlagScrollBanner />
 
       {/* ===== FOOTER ===== */}
-      <footer className="bg-gray-900 dark:bg-surface-0 text-white pt-16 pb-8">
+      <footer className="bg-gray-900 dark:bg-surface-0 text-white pt-16 overflow-hidden" style={{ background: 'linear-gradient(160deg,#0F2A3D 0%,#0a1620 55%,#0b2a52 100%)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid md:grid-cols-4 gap-8 mb-12">
             <div>
@@ -873,14 +896,14 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* LiAfrik identity banner */}
+          {/* Liafrik identity banner */}
           <div className="py-6 border-t border-white/10">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <p className="text-sm text-gray-300 font-medium">
                   LiBooks est développé par{' '}
                   <a href="https://liafrik.com" target="_blank" rel="noopener noreferrer" className="text-white font-medium hover:text-[#0057D9] transition-colors">
-                    LiAfrik Tech
+                    Liafrik Tech
                   </a>{' '}
                   — Dubaï 🇦🇪 & Afrique
                 </p>
@@ -908,7 +931,7 @@ export default function LandingPage() {
 
           {/* Instagram : simple bouton (aucune vidéo / aucun embed) */}
           <div className="py-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-gray-400">Les coulisses de LiAfrik Tech, chaque semaine.</p>
+            <p className="text-sm text-gray-400">Les coulisses de Liafrik Tech, chaque semaine.</p>
             <a
               href="https://www.instagram.com/liafrik_tech?igsi=eXBjdTc5NG42Zml4&utm_source=qr"
               target="_blank"
@@ -931,6 +954,11 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
+        <FooterWatermark>
+          <div className="absolute right-6 sm:right-12 top-0 sm:top-6 text-white/80">
+            <RotatingBadge />
+          </div>
+        </FooterWatermark>
       </footer>
       <ChatWidget />
       <MarketingPopup />

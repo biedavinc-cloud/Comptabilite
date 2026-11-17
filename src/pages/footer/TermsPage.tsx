@@ -39,7 +39,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">1. Purpose</h2>
               <p>
-                These Terms of Service govern the use of the LiBooks platform, published by LiAfrik
+                These Terms of Service govern the use of the LiBooks platform, published by Liafrik
                 (Dubai, UAE & Yaoundé, Cameroon). By creating an account, you accept these terms
                 without reservation.
               </p>
@@ -59,7 +59,7 @@ export default function TermsPage() {
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">3. User account</h2>
               <p>
                 Creating an account requires a valid email address and a password. The user is responsible
-                for keeping their credentials confidential. LiAfrik reserves the right to suspend an account
+                for keeping their credentials confidential. Liafrik reserves the right to suspend an account
                 in case of fraudulent use or use contrary to these terms.
               </p>
             </section>
@@ -122,12 +122,12 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">9. LiAfrik's responsibilities</h2>
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">9. Liafrik's responsibilities</h2>
               <p>
-                LiAfrik commits to providing a service available 99.9% of the time (excluding scheduled
+                Liafrik commits to providing a service available 99.9% of the time (excluding scheduled
                 maintenance). In case of an outage, support can be reached at
                 <a href="mailto:support@liafrik.com" className="text-[#0057D9] hover:underline"> support@liafrik.com</a>.
-                LiAfrik cannot be held liable for accounting or tax decisions made based on information
+                Liafrik cannot be held liable for accounting or tax decisions made based on information
                 provided by the platform, which is provided for guidance only.
               </p>
             </section>
@@ -136,7 +136,7 @@ export default function TermsPage() {
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">10. Intellectual property</h2>
               <p>
                 The platform, its code, its design and the built-in SYSCOHADA chart of accounts are the
-                property of LiAfrik. Data entered by the user remains their exclusive property. The user
+                property of Liafrik. Data entered by the user remains their exclusive property. The user
                 retains a permanent right to export their data.
               </p>
             </section>
@@ -152,7 +152,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">12. Changes to these terms</h2>
               <p>
-                LiAfrik reserves the right to amend these terms. Users will be notified by email at least
+                Liafrik reserves the right to amend these terms. Users will be notified by email at least
                 30 days before substantial changes take effect.
               </p>
             </section>
@@ -180,7 +180,7 @@ export default function TermsPage() {
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">1. Objet</h2>
               <p>
                 Les présentes Conditions Générales d'Utilisation (CGU) et Conditions Générales de Vente (CGV)
-                régissent l'utilisation de la plateforme LiBooks, éditée par LiAfrik (Dubaï, EAU &
+                régissent l'utilisation de la plateforme LiBooks, éditée par Liafrik (Dubaï, EAU &
                 Yaoundé, Cameroun). En créant un compte, vous acceptez sans réserve les présentes conditions.
               </p>
             </section>
@@ -199,7 +199,7 @@ export default function TermsPage() {
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">3. Compte utilisateur</h2>
               <p>
                 La création de compte nécessite une adresse email valide et un mot de passe. L'utilisateur est
-                responsable de la confidentialité de ses identifiants. LiAfrik se réserve le droit de
+                responsable de la confidentialité de ses identifiants. Liafrik se réserve le droit de
                 suspendre un compte en cas d'usage frauduleux ou contraire aux présentes conditions.
               </p>
             </section>
@@ -263,11 +263,11 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">9. Responsabilités de LiAfrik</h2>
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">9. Responsabilités de Liafrik</h2>
               <p>
-                LiAfrik s'engage à fournir un service disponible à 99,9 % (hors maintenance planifiée).
+                Liafrik s'engage à fournir un service disponible à 99,9 % (hors maintenance planifiée).
                 En cas de panne, le support est joignable à <a href="mailto:support@liafrik.com" className="text-[#0057D9] hover:underline">support@liafrik.com</a>.
-                LiAfrik ne saurait être tenu responsable des décisions comptables ou fiscales prises sur
+                Liafrik ne saurait être tenu responsable des décisions comptables ou fiscales prises sur
                 la base des informations fournies par la plateforme. Celles-ci sont fournies à titre indicatif.
               </p>
             </section>
@@ -276,7 +276,7 @@ export default function TermsPage() {
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">10. Propriété intellectuelle</h2>
               <p>
                 La plateforme, son code, son design et le plan comptable SYSCOHADA intégré sont la propriété
-                de LiAfrik. Les données saisies par l'utilisateur restent sa propriété exclusive.
+                de Liafrik. Les données saisies par l'utilisateur restent sa propriété exclusive.
                 L'utilisateur conserve un droit d'export permanent de ses données.
               </p>
             </section>
@@ -292,7 +292,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">12. Modification des conditions</h2>
               <p>
-                LiAfrik se réserve le droit de modifier les présentes conditions. Les utilisateurs seront
+                Liafrik se réserve le droit de modifier les présentes conditions. Les utilisateurs seront
                 notifiés par email au moins 30 jours avant l'entrée en vigueur des modifications substantielles.
               </p>
             </section>
@@ -320,9 +320,9 @@ export default function TermsPage() {
       <footer className="border-t border-gray-100 dark:border-surface-3 py-8">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-sm text-gray-400">
-            LiBooks {isEn ? 'is built by' : 'est développé par'} <span className="font-medium text-gray-600 dark:text-gray-300">LiAfrik</span> — Dubai & Yaoundé
+            LiBooks {isEn ? 'is built by' : 'est développé par'} <span className="font-medium text-gray-600 dark:text-gray-300">Liafrik</span> — Dubai & Yaoundé
           </p>
-          <p className="text-xs text-gray-400 mt-1">© {new Date().getFullYear()} LiAfrik. {isEn ? 'All rights reserved.' : 'Tous droits réservés.'}</p>
+          <p className="text-xs text-gray-400 mt-1">© {new Date().getFullYear()} Liafrik. {isEn ? 'All rights reserved.' : 'Tous droits réservés.'}</p>
         </div>
       </footer>
     </div>

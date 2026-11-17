@@ -7,7 +7,8 @@ import logo from '../assets/logo.png';
 import ThemeToggle from '../components/ui/ThemeToggle';
 import { usePageMeta } from '../lib/usePageMeta';
 import { supabase } from '../lib/supabase';
-import { BlogPost, STATIC_POSTS, ECOSYSTEM, renderMarkdown } from '../lib/blog';
+import { BlogPost, STATIC_POSTS, renderContent } from '../lib/blog';
+import { ECOSYSTEM_PRODUCTS, LIYAH_GROUP } from '../lib/ecosystem';
 import { Reveal } from '../components/ui/Motion';
 
 function usePosts(lang: 'fr' | 'en') {
@@ -18,7 +19,8 @@ function usePosts(lang: 'fr' | 'en') {
         .order('published_at', { ascending: false }).limit(100);
       const db = (data ?? []) as BlogPost[];
       const slugs = new Set(db.map((p) => p.slug));
-      return [...db, ...STATIC_POSTS.filter((p) => p.lang === lang && !slugs.has(p.slug))];
+      const all = [...db, ...STATIC_POSTS.filter((p) => p.lang === lang && !slugs.has(p.slug))];
+      return all.sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
     },
     staleTime: 60_000,
   });
@@ -51,7 +53,7 @@ function Shell({ children, isEn }: { children: React.ReactNode; isEn: boolean })
       </nav>
       {children}
       <footer className="border-t border-gray-100 dark:border-surface-3 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
-        © {new Date().getFullYear()} LiBooks — {isEn ? 'built by' : 'développé par'} <a className="text-[#0057D9]" href="https://liafrik.com" target="_blank" rel="noopener noreferrer">LiAfrik Tech</a>
+        © {new Date().getFullYear()} LiBooks — {isEn ? 'built by' : 'développé par'} <a className="text-[#0057D9]" href="https://liafrik.com" target="_blank" rel="noopener noreferrer">Liafrik Tech</a>
       </footer>
     </div>
   );
@@ -66,15 +68,15 @@ export function BlogIndexPage() {
   const [cat, setCat] = useState<string | null>(null);
 
   usePageMeta(
-    isEn ? 'Blog — African tech, accounting & the LiAfrik ecosystem' : 'Blog — Tech africaine, comptabilité & écosystème LiAfrik',
+    isEn ? 'Blog — African tech, accounting & the Liafrik ecosystem' : 'Blog — Tech africaine, comptabilité & écosystème Liafrik',
     isEn
-      ? 'Guides on online accounting software, OHADA, Mobile Money and the African tech ecosystem, by LiAfrik Tech.'
-      : 'Guides logiciel de comptabilité en ligne, SYSCOHADA, Mobile Money, IA et écosystème tech africain LiAfrik.'
+      ? 'Guides on online accounting software, OHADA, Mobile Money and the African tech ecosystem, by Liafrik Tech.'
+      : 'Guides logiciel de comptabilité en ligne, SYSCOHADA, Mobile Money, IA et écosystème tech africain Liafrik.'
   );
 
   useEffect(() => setJsonLd('ld-blog', {
     '@context': 'https://schema.org', '@type': 'Blog', name: 'Blog LiBooks', url: `https://libooks.liafrik.com${isEn ? '/en' : ''}/blog`,
-    publisher: { '@type': 'Organization', name: 'LiAfrik Tech', url: 'https://liafrik.com' },
+    publisher: { '@type': 'Organization', name: 'Liafrik Tech', url: 'https://liafrik.com' },
     blogPost: posts.slice(0, 20).map((p) => ({ '@type': 'BlogPosting', headline: p.title, url: `https://libooks.liafrik.com${isEn ? '/en' : ''}/blog/${p.slug}`, datePublished: p.published_at })),
   }), [posts, isEn]);
 
@@ -100,7 +102,7 @@ export function BlogIndexPage() {
           </Reveal>
           <Reveal delay={160}>
             <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              {isEn ? 'Accounting, payments, AI and the LiAfrik ecosystem — for businesses building Africa’s future.' : 'Comptabilité, paiements, IA et écosystème LiAfrik — pour les entreprises qui construisent l’Afrique de demain.'}
+              {isEn ? 'Accounting, payments, AI and the Liafrik ecosystem — for businesses building Africa’s future.' : 'Comptabilité, paiements, IA et écosystème Liafrik — pour les entreprises qui construisent l’Afrique de demain.'}
             </p>
           </Reveal>
           <Reveal delay={240}>
@@ -162,16 +164,23 @@ export function BlogIndexPage() {
 
 function Ecosystem({ isEn }: { isEn: boolean }) {
   return (
-    <section className="mt-20 rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#0F2A3D 0%,#0a1620 60%,#0057D9 140%)' }}>
+    <section className="mt-20 rounded-3xl p-6 sm:p-10 text-white relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#0F2A3D 0%,#0a1620 60%,#0057D9 140%)' }}>
       <div className="absolute -right-16 -bottom-16 w-72 h-72 rounded-full bg-[#0057D9]/40 blur-3xl" />
       <div className="relative">
         <p className="text-xs uppercase tracking-[0.25em] text-white/60">{isEn ? 'The ecosystem' : 'L’écosystème'}</p>
-        <h2 className="mt-2 text-2xl sm:text-3xl font-semibold">LiAfrik Tech</h2>
-        <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {ECOSYSTEM.map((e) => (
-            <a key={e.name} href={e.url} target="_blank" rel="noopener noreferrer" className="group rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 p-5 transition-colors">
-              <p className="font-semibold flex items-center gap-1.5">{e.name} <ExternalLink className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100" /></p>
-              <p className="text-sm text-white/60 mt-1">{e.desc}</p>
+        <h2 className="mt-2 text-2xl sm:text-3xl font-semibold">Liafrik Tech</h2>
+        <p className="mt-2 text-sm text-white/60 max-w-2xl">{isEn ? 'A subsidiary of' : 'Filiale de'} {LIYAH_GROUP.name} — {LIYAH_GROUP.description}</p>
+        <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {ECOSYSTEM_PRODUCTS.map((e) => (
+            <a key={e.id} href={e.url} target="_blank" rel="noopener noreferrer" className="group rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 p-5 transition-all hover:-translate-y-0.5">
+              <div className="flex items-center gap-3">
+                <span className="w-9 h-9 rounded-xl flex items-center justify-center font-bold" style={{ background: e.color }}>{e.name.charAt(0).toUpperCase()}</span>
+                <div className="min-w-0">
+                  <p className="font-semibold flex items-center gap-1.5">{e.name} <ExternalLink className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100" /></p>
+                  <p className="text-[11px] text-white/50 truncate">{e.linkable ? e.domain : e.category}</p>
+                </div>
+              </div>
+              <p className="text-sm text-white/70 mt-3">{e.tagline}</p>
             </a>
           ))}
         </div>
@@ -188,19 +197,19 @@ export function BlogPostPage() {
   const post = posts.find((p) => p.slug === slug);
   const base = isEn ? '/en/blog' : '/blog';
 
-  usePageMeta(post?.title ?? 'Blog', post?.excerpt);
+  usePageMeta(post?.meta_title || post?.title || 'Blog', post?.excerpt);
   useEffect(() => {
     if (!post) return;
     return setJsonLd('ld-post', {
       '@context': 'https://schema.org', '@type': 'BlogPosting', headline: post.title, description: post.excerpt,
       datePublished: post.published_at, author: { '@type': 'Organization', name: post.author },
-      publisher: { '@type': 'Organization', name: 'LiAfrik Tech', logo: { '@type': 'ImageObject', url: 'https://libooks.liafrik.com/logo-512.png' } },
+      publisher: { '@type': 'Organization', name: 'Liafrik Tech', logo: { '@type': 'ImageObject', url: 'https://libooks.liafrik.com/logo-512.png' } },
       mainEntityOfPage: `https://libooks.liafrik.com${base}/${post.slug}`, keywords: post.tags.join(', '),
       image: post.cover_url || 'https://libooks.liafrik.com/logo-512.png',
     });
   }, [post, base]);
 
-  const html = useMemo(() => (post ? renderMarkdown(post.content) : ''), [post]);
+  const html = useMemo(() => (post ? renderContent(post.content) : ''), [post]);
   const related = posts.filter((p) => p.slug !== slug).slice(0, 3);
 
   return (
@@ -220,7 +229,7 @@ export function BlogPostPage() {
               <span>{post.author}</span>·<span>{post.published_at ? new Date(post.published_at).toLocaleDateString(isEn ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}</span>·<span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{post.reading_min} min</span>
             </p>
           </Reveal>
-          {post.cover_url && <img src={post.cover_url} alt="" className="mt-8 rounded-2xl w-full object-cover max-h-[420px]" />}
+          {post.cover_url && <img src={post.cover_url} alt={post.cover_alt ?? ""} className="mt-8 rounded-2xl w-full object-cover max-h-[420px]" />}
           <div className="lb-prose mt-10" dangerouslySetInnerHTML={{ __html: html }} />
           {post.tags.length > 0 && (
             <div className="mt-10 flex flex-wrap gap-2">{post.tags.map((t) => <span key={t} className="text-xs px-3 py-1 rounded-full bg-gray-100 dark:bg-surface-2 text-gray-600 dark:text-gray-300">#{t}</span>)}</div>
