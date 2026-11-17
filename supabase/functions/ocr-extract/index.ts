@@ -4,8 +4,8 @@
 //
 // Requires the Edge Function secret: ANTHROPIC_API_KEY
 //
-// Request body: { document_url: string, tenant_id: string }
-// (document_url is a signed URL to the file already uploaded to Storage
+// Request body: { document_path: string, tenant_id: string, media_type?: string }
+// (document_path is the object path in the PRIVATE tenant-documents bucket
 // via uploadOcrDocument() in src/lib/upload.ts)
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.7";
@@ -48,8 +48,8 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const { document_url, tenant_id, media_type } = await req.json();
-    if (!document_url || !tenant_id) throw new Error("document_url and tenant_id are required");
+    const { document_path, tenant_id, media_type } = await req.json();
+    if (!document_path || !tenant_id) throw new Error("document_path and tenant_id are required");
 
     const serviceClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const { data: membership } = await serviceClient
@@ -58,23 +58,17 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Not a member of this tenant" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // SECURITY: document_url was previously fetched with zero validation —
-    // any authenticated tenant member could pass ANY URL (an internal
-    // cloud-metadata endpoint, an attacker-controlled server, a huge file
-    // to exhaust memory, or another tenant's private document) and this
-    // function would dutifully fetch it server-side and forward its bytes
-    // to the Anthropic API using our own key. Restrict it to exactly the
-    // shape uploadOcrDocument() produces: this tenant's own folder in the
-    // tenant-assets bucket.
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const expectedPrefix = `${supabaseUrl}/storage/v1/object/public/tenant-assets/${tenant_id}/ocr/`;
-    if (!document_url.startsWith(expectedPrefix)) {
-      return new Response(JSON.stringify({ error: "document_url must point to this tenant's own uploaded document" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    // SECURITY: les justificatifs vivent dans le bucket PRIVÉ tenant-documents.
+    // Le chemin doit être exactement dans le dossier OCR de CETTE entreprise
+    // (aucune URL arbitraire, aucun « .. », aucun autre tenant).
+    const path = String(document_path);
+    if (!path.startsWith(`${tenant_id}/ocr/`) || path.includes("..") || path.includes("//")) {
+      return new Response(JSON.stringify({ error: "document_path must point to this tenant's own uploaded document" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Fetch the image bytes and base64-encode them for the vision API.
-    const fileRes = await fetch(document_url);
-    if (!fileRes.ok) throw new Error("Could not fetch the uploaded document");
+    const { data: blob, error: dlError } = await serviceClient.storage.from("tenant-documents").download(path);
+    if (dlError || !blob) throw new Error("Could not fetch the uploaded document");
+    const fileRes = { headers: new Headers({ "content-type": blob.type, "content-length": String(blob.size) }), arrayBuffer: () => blob.arrayBuffer() };
 
     // Belt-and-braces size cap (uploadOcrDocument() already enforces 5MB
     // client-side, but never trust the client alone) — refuse to read an

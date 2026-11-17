@@ -66,13 +66,13 @@ export default function Ohada() {
     setOcrUploading(true);
     setOcrExtracted(null);
     try {
-      const { url } = await uploadOcrDocument(tenant!.id, file);
+      const { url, path } = await uploadOcrDocument(tenant!.id, file);
       setOcrUploaded({ name: file.name, url });
       await supabase.from('audit_logs').insert({
         tenant_id: tenant!.id,
         action: 'ocr_upload',
         module: 'ohada',
-        after_data: { filename: file.name, url },
+        after_data: { filename: file.name, path },
       });
 
       setOcrExtracting(true);
@@ -84,7 +84,7 @@ export default function Ohada() {
           apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
           Authorization: `Bearer ${session.session?.access_token}`,
         },
-        body: JSON.stringify({ document_url: url, tenant_id: tenant!.id, media_type: file.type }),
+        body: JSON.stringify({ document_path: path, tenant_id: tenant!.id, media_type: file.type }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Échec de l'extraction");

@@ -1,6 +1,8 @@
 import { supabase } from './supabase';
 
 const BUCKET = 'tenant-assets';
+/** Stockage PRIVÉ des justificatifs (factures, reçus) : lisible uniquement par les membres de l'entreprise. */
+const DOCS_BUCKET = 'tenant-documents';
 const MAX_SIZE = 2 * 1024 * 1024; // 2 MB
 const DOC_MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];
@@ -45,8 +47,10 @@ export async function uploadTenantAsset(
 }
 
 /**
- * Upload an OCR document (invoice/receipt photo or PDF) to tenant-assets.
- * Stored at `<tenant_id>/ocr/<timestamp>-<filename>` to keep each upload distinct.
+ * Upload an OCR document (invoice/receipt photo or PDF) to the PRIVATE
+ * tenant-documents bucket at `<tenant_id>/ocr/<timestamp>-<filename>`.
+ * Pièces comptables = données confidentielles : jamais d'URL publique.
+ * `url` est un lien signé temporaire (1 h) pour l'aperçu.
  */
 export async function uploadOcrDocument(
   tenantId: string,
@@ -63,15 +67,13 @@ export async function uploadOcrDocument(
   const path = `${tenantId}/ocr/${Date.now()}-${safeName}`;
 
   const { error: upErr } = await supabase.storage
-    .from(BUCKET)
+    .from(DOCS_BUCKET)
     .upload(path, file, { contentType: file.type });
 
   if (upErr) throw upErr;
 
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  const url = `${data.publicUrl}?t=${Date.now()}`;
-
-  return { url, path };
+  const { data } = await supabase.storage.from(DOCS_BUCKET).createSignedUrl(path, 3600);
+  return { url: data?.signedUrl ?? '', path };
 }
 
 export function validateImageFile(file: File): string | null {
