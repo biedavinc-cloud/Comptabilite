@@ -3,42 +3,14 @@
 // cartes pays flottantes, texte épinglé, filigrane géant, badge rotatif) —
 // aux couleurs LiBooks, 100 % CSS transforms + rAF, reduced-motion respecté.
 import { useEffect, useRef, useState, ReactNode } from 'react';
-import { Link } from 'react-router-dom';
 import {
   ArrowUpRight, ArrowRight, Check, FileText, Smartphone, Package, Building2, Bot, ScanLine,
 } from 'lucide-react';
 import logo from '../../assets/logo.png';
-import { prefersReducedMotion, Reveal, CountUp, useInView } from '../ui/Motion';
+import { prefersReducedMotion, Reveal, CountUp, useScrollProgress } from '../ui/Motion';
 import { ECOSYSTEM_PRODUCTS, LIYAH_GROUP, LIAFRIK_URL } from '../../lib/ecosystem';
 
 const flag = (cc: string, w = 80) => `https://flagcdn.com/w${w}/${cc}.png`;
-
-/** Progression 0→1 d'un élément traversant le viewport (rAF-throttlé). */
-function useScrollProgress<T extends HTMLElement>(mode: 'through' | 'pinned' = 'through') {
-  const ref = useRef<T>(null);
-  const [p, setP] = useState(0);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (prefersReducedMotion()) { setP(mode === 'pinned' ? 0.5 : 1); return; }
-    let raf = 0;
-    const update = () => {
-      const r = el.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const v = mode === 'pinned'
-        ? -r.top / Math.max(1, r.height - vh)
-        : (vh - r.top) / (vh + r.height);
-      setP(Math.min(1, Math.max(0, v)));
-      raf = 0;
-    };
-    const on = () => { if (!raf) raf = requestAnimationFrame(update); };
-    window.addEventListener('scroll', on, { passive: true });
-    window.addEventListener('resize', on);
-    update();
-    return () => { window.removeEventListener('scroll', on); window.removeEventListener('resize', on); };
-  }, [mode]);
-  return { ref, p };
-}
 
 /* ------------------------------------------------------------------ */
 /* 1. Mot rotatif (hero)                                               */
@@ -200,92 +172,6 @@ export function StatementSection({ countries, currencies }: { countries: number;
 }
 
 /* ------------------------------------------------------------------ */
-/* 4. Cartes « Conçu pour… »                                           */
-/* ------------------------------------------------------------------ */
-export function UseCaseCards() {
-  const cards = [
-    {
-      kicker: 'Conçu pour', title: 'PME & commerçants africains', desc: 'Facturez, encaissez en Mobile Money et tenez une comptabilité conforme, sans expert à plein temps.',
-      bg: 'linear-gradient(160deg,#0057D9 0%,#0F2A3D 100%)', dark: true,
-      visual: (
-        <div className="relative w-56 h-44">
-          <div className="absolute inset-x-4 top-0 h-24 rounded-2xl bg-[#B7F7C4] rotate-[-8deg] shadow-lg transition-transform duration-700 group-hover:rotate-[-14deg] group-hover:-translate-x-3" />
-          <div className="absolute inset-x-6 top-2 h-24 rounded-2xl bg-[#FFE7A3] rotate-[6deg] shadow-lg transition-transform duration-700 group-hover:rotate-[12deg] group-hover:translate-x-3" />
-          <div className="absolute inset-x-3 top-5 h-24 rounded-2xl bg-gradient-to-br from-[#BFDBFE] to-[#60A5FA] shadow-lg"><span className="m-3 inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-white text-[#0057D9]">MoMo</span></div>
-          <div className="absolute inset-x-0 bottom-0 rounded-2xl bg-[#0F2A3D]/95 text-white p-4 text-center shadow-2xl backdrop-blur">
-            <p className="text-[10px] text-white/60">Encaissé cette semaine</p>
-            <p className="text-xl font-semibold tabular-nums">XAF 1 284 500<span className="text-white/40">,00</span></p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      kicker: 'Aussi pour', title: 'Groupes & filiales multi-pays', desc: 'Multi-sociétés, multi-devises, consolidation et conformité locale depuis un seul compte.',
-      bg: 'linear-gradient(160deg,#111827 0%,#030712 100%)', dark: true,
-      visual: (
-        <div className="relative w-64 h-48 flex items-center justify-center">
-          <div className="absolute w-28 h-48 rounded-2xl bg-white/10" />
-          <div className="absolute w-60 h-24 rounded-2xl bg-white/10" />
-          <div className="relative w-44 rounded-2xl overflow-hidden shadow-2xl bg-white transition-transform duration-700 group-hover:-rotate-3 group-hover:scale-105">
-            <div className="bg-[#0057D9] text-white p-3"><p className="text-sm font-bold tracking-wide">FACTURE</p><p className="text-[9px] text-white/70">Filiale Dubaï → Douala</p></div>
-            <div className="p-3 space-y-1 text-[9px] text-gray-600">
-              <div className="flex justify-between"><span>Réf.</span><span className="font-semibold">INV-2041</span></div>
-              <div className="flex justify-between"><span>Montant</span><span className="font-semibold">USD 2 400</span></div>
-              <div className="flex justify-between"><span>Converti</span><span className="font-semibold">XAF 1 464 000</span></div>
-            </div>
-          </div>
-          <span className="absolute top-6 -left-1 rotate-[-8deg] text-[10px] font-semibold px-2.5 py-1 rounded-full bg-white text-gray-800 shadow-lg">↙ + USD 2 400</span>
-          <span className="absolute top-10 -right-2 rotate-[6deg] text-[10px] font-semibold px-2.5 py-1 rounded-full bg-white text-gray-800 shadow-lg flex items-center gap-1"><Check className="w-3 h-3 text-emerald-500" /> Payée</span>
-        </div>
-      ),
-    },
-    {
-      kicker: 'Aussi pour', title: 'Cabinets comptables & experts', desc: 'Gérez tous vos clients, leurs liasses et déclarations avec les accès et rôles adaptés.',
-      bg: 'linear-gradient(160deg,#DBEAFE 0%,#93C5FD 100%)', dark: false,
-      visual: (
-        <div className="w-64 rounded-2xl bg-white shadow-2xl p-3 transition-transform duration-700 group-hover:-translate-y-2">
-          <p className="text-[11px] font-semibold text-gray-800 mb-2 px-1">Dossiers clients clôturés</p>
-          {[['ci', 'Boutique Akwaba', 'Abidjan'], ['cm', 'Bakery Bonapriso', 'Douala'], ['sn', 'Studio Teranga', 'Dakar'], ['ga', 'Gabon Logistic', 'Libreville']].map(([c, n, w]) => (
-            <div key={n} className="flex items-center gap-2 rounded-xl bg-gray-50 px-2 py-1.5 mb-1.5">
-              <img src={flag(c, 40)} alt="" className="w-6 h-6 rounded-full object-cover" />
-              <div className="flex-1 min-w-0"><p className="text-[10px] font-semibold text-gray-800 truncate">{n}</p><p className="text-[9px] text-gray-400">{w}</p></div>
-              <span className="w-4 h-4 rounded-full bg-[#0057D9] flex items-center justify-center"><Check className="w-2.5 h-2.5 text-white" /></span>
-            </div>
-          ))}
-        </div>
-      ),
-    },
-  ];
-  return (
-    <section className="py-24 bg-gray-50 dark:bg-surface-0">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
-          <Reveal><h2 className="text-5xl sm:text-7xl font-light tracking-tight text-[#0F2A3D] dark:text-white leading-none">Pour qui<span className="font-semibold">.</span></h2></Reveal>
-          <Reveal delay={120}><p className="text-lg text-gray-500 dark:text-gray-400 max-w-md">Des entreprises réelles qui vendent, encaissent et grandissent au-delà des frontières. Un forfait par entreprise, sans surprise.</p></Reveal>
-        </div>
-        <div className="grid md:grid-cols-3 gap-5">
-          {cards.map((c, i) => (
-            <Reveal key={c.title} delay={i * 120} variant="up">
-              <Link to="/signup" className="group relative block h-[520px] rounded-[2rem] overflow-hidden p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl" style={{ background: c.bg }}>
-                <span className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-lg transition-transform duration-500 group-hover:rotate-45 group-hover:scale-110">
-                  <ArrowUpRight className="w-5 h-5 text-[#0F2A3D]" />
-                </span>
-                <div className="flex justify-center pt-10 transition-transform duration-700 group-hover:scale-[1.04]">{c.visual}</div>
-                <div className="absolute inset-x-8 bottom-8">
-                  <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${c.dark ? 'text-white/70' : 'text-[#0F2A3D]/70'}`}>{c.kicker}</p>
-                  <h3 className={`mt-2 text-3xl font-semibold tracking-tight leading-tight ${c.dark ? 'text-white' : 'text-[#0F2A3D]'}`}>{c.title}</h3>
-                  <p className={`mt-2 text-sm ${c.dark ? 'text-white/75' : 'text-[#0F2A3D]/75'}`}>{c.desc}</p>
-                </div>
-              </Link>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* 5. Liste numérotée + visuel sticky qui change au scroll             */
 /* ------------------------------------------------------------------ */
 const FEATURES = [
@@ -398,116 +284,6 @@ export function StickyFeatures() {
               <span className="absolute left-6 bottom-6 text-xs font-semibold px-3 py-1.5 rounded-full bg-white text-[#0F2A3D] shadow">{String(active + 1).padStart(2, '0')} · {FEATURES[active].title}</span>
             </div>
           </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* 6. Couverture : cartes pays flottantes autour d'un titre géant      */
-/* ------------------------------------------------------------------ */
-const COVER = [
-  { cc: 'cm', name: 'Cameroun', tag: 'OHADA · MoMo', x: '6%', y: '14%', r: -8, d: 1.2 },
-  { cc: 'ci', name: 'Côte d’Ivoire', tag: 'OHADA · Wave', x: '3%', y: '58%', r: 4, d: 0.8 },
-  { cc: 'sn', name: 'Sénégal', tag: 'OHADA · Wave', x: '28%', y: '2%', r: -3, d: 1.5 },
-  { cc: 'ng', name: 'Nigeria', tag: 'Cartes · Virement', x: '62%', y: '4%', r: 4, d: 1.1 },
-  { cc: 'ke', name: 'Kenya', tag: 'M-Pesa', x: '80%', y: '18%', r: 7, d: 0.9 },
-  { cc: 'ae', name: 'Émirats', tag: 'Multi-devises', x: '82%', y: '60%', r: -6, d: 1.3 },
-  { cc: 'gh', name: 'Ghana', tag: 'MoMo', x: '22%', y: '78%', r: -4, d: 1.0 },
-  { cc: 'fr', name: 'France', tag: 'TVA · SEPA', x: '62%', y: '80%', r: 3, d: 1.4 },
-];
-
-export function CoverageSection({ countries, currencies }: { countries: number; currencies: number }) {
-  const ref = useRef<HTMLElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || prefersReducedMotion() || !window.matchMedia('(pointer: fine)').matches) return;
-    const move = (e: PointerEvent) => {
-      const r = el.getBoundingClientRect();
-      el.style.setProperty('--px', String((e.clientX - r.left) / r.width - 0.5));
-      el.style.setProperty('--py', String((e.clientY - r.top) / r.height - 0.5));
-    };
-    el.addEventListener('pointermove', move);
-    return () => el.removeEventListener('pointermove', move);
-  }, []);
-  const { ref: inRef, inView } = useInView<HTMLDivElement>(0.2);
-  return (
-    <section ref={ref} className="relative overflow-hidden text-white" style={{ background: 'linear-gradient(135deg,#0057D9 0%,#0F2A3D 80%)' }}>
-      <div ref={inRef} className="relative max-w-7xl mx-auto px-4 sm:px-6 py-28 lg:py-0 lg:h-[820px] flex items-center justify-center">
-        {COVER.map((c, i) => (
-          <div key={c.cc} className="hidden lg:block absolute w-56 transition-all duration-1000"
-            style={{
-              left: c.x, top: c.y,
-              opacity: inView ? 1 : 0,
-              transform: `translate3d(calc(var(--px,0) * ${c.d * 40}px), calc(var(--py,0) * ${c.d * 40}px), 0) rotate(${c.r}deg) scale(${inView ? 1 : 0.8})`,
-              transitionDelay: `${i * 90}ms`,
-            }}>
-            <div className="rounded-2xl bg-white text-[#0F2A3D] p-4 shadow-2xl hover:-translate-y-1 transition-transform" style={{ animation: `lb-float ${5 + (i % 3)}s ease-in-out ${i * 0.4}s infinite` }}>
-              <div className="flex items-center gap-2.5"><img src={flag(c.cc)} alt="" className="w-9 h-9 rounded-full object-cover ring-1 ring-black/5" loading="lazy" /><p className="font-semibold">{c.name}</p></div>
-              <span className="mt-8 inline-block text-[10px] font-semibold px-2.5 py-1 rounded-full bg-[#0F2A3D] text-white">{c.tag}</span>
-            </div>
-          </div>
-        ))}
-        <div className="relative text-center z-10">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/70 flex items-center justify-center gap-3"><span className="w-8 h-px bg-white/50" /> Couverture</p>
-          <h2 className="mt-4 text-6xl sm:text-8xl lg:text-9xl font-semibold tracking-tight leading-[0.95]"><CountUp to={countries} /> pays.</h2>
-          <p className="text-5xl sm:text-7xl lg:text-8xl font-light tracking-tight leading-none mt-1"><CountUp to={currencies} /> devises.</p>
-          <p className="mt-6 text-white/75 max-w-md mx-auto">Afrique de l’Ouest, centrale, de l’Est et australe, Moyen-Orient et Europe. Régions, villes, TVA et plans comptables pré-configurés.</p>
-          <div className="lg:hidden mt-8 flex flex-wrap justify-center gap-2">
-            {COVER.map((c) => <span key={c.cc} className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-white/10"><img src={flag(c.cc, 40)} alt="" className="w-4 h-4 rounded-full object-cover" />{c.name}</span>)}
-          </div>
-          <Link to="/signup" className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-[#0F2A3D] font-semibold hover:gap-3 transition-all">Démarrer dans mon pays <ArrowRight className="w-4 h-4" /></Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* 7. Texte géant épinglé qui glisse derrière une pile de cartes        */
-/* ------------------------------------------------------------------ */
-export function PinnedCardStack() {
-  const { ref, p } = useScrollProgress<HTMLElement>('pinned');
-  const x = 30 - p * 140; // % de la largeur du texte
-  const fan = Math.min(1, p * 1.8);
-  const cards = [
-    { title: 'Mobile Money', items: [['Orange Money', 'ci'], ['MTN MoMo', 'cm'], ['Wave', 'sn']], bg: '#0057D9' },
-    { title: 'Devises', items: [['XAF', 'cm'], ['XOF', 'sn'], ['NGN', 'ng']], bg: '#ffffff' },
-    { title: 'Comptes bancaires', items: [['Banque locale', 'cm'], ['USD', 'us'], ['EUR', 'eu']], bg: '#0F2A3D' },
-  ];
-  return (
-    <section ref={ref} className="relative h-[240vh] bg-gray-50 dark:bg-surface-0">
-      <div className="sticky top-0 h-screen overflow-hidden flex items-center">
-        <div className="absolute whitespace-nowrap will-change-transform select-none" aria-hidden="true" style={{ transform: `translate3d(${x}%,0,0)` }}>
-          <span className="lb-giant">Facturez. </span><span className="lb-giant lb-outline">Encaissez. </span><span className="lb-giant">Consolidez. </span><span className="lb-giant lb-giant-accent">Grandissez.</span>
-        </div>
-        <div className="relative mx-auto w-[min(560px,90vw)] h-[380px] rounded-[2rem] bg-white/60 dark:bg-surface-1/60 backdrop-blur-xl ring-1 ring-gray-200 dark:ring-surface-3 flex items-center justify-center">
-          {cards.map((c, i) => {
-            const dark = c.bg !== '#ffffff';
-            const rot = (i - 1) * 7 * fan;
-            const tx = (i - 1) * 26 * fan;
-            const ty = (1 - i) * 10 * fan;
-            return (
-              <div key={c.title} className="absolute w-[min(400px,78vw)] rounded-3xl p-6 shadow-2xl transition-transform duration-200"
-                style={{ background: c.bg, transform: `translate3d(${tx}px, ${ty}px, 0) rotate(${rot}deg)`, zIndex: i === 2 ? 3 : i }}>
-                <div className="flex justify-between gap-4">
-                  <div>
-                    <p className={`text-5xl font-bold ${dark ? 'text-white' : 'text-[#0F2A3D]'}`}>3</p>
-                    <p className={`mt-2 font-semibold ${dark ? 'text-white' : 'text-[#0F2A3D]'}`}>{c.title}</p>
-                    <p className={`text-xs mt-1 ${dark ? 'text-white/60' : 'text-gray-500'}`}>Rapprochés automatiquement</p>
-                  </div>
-                  <div className="space-y-2 w-36">
-                    {c.items.map(([n, cc], k) => (
-                      <div key={n} className={`flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold ${k === 0 ? 'bg-[#22C55E]/90 text-white' : dark ? 'bg-white/10 text-white' : 'bg-gray-100 text-gray-800'}`}>
-                        {n}<img src={flag(cc, 40)} alt="" className="w-4 h-4 rounded-full object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
         </div>
       </div>
     </section>

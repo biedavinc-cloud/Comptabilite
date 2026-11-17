@@ -19,14 +19,16 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { PLAN_LIMITS, MODULES, ModuleKey, COUNTRIES, COMMON_CURRENCIES } from '../lib/countryData';
 import {
-  RotatingWord, LiveFeedCard, StatementSection, UseCaseCards, StickyFeatures, CoverageSection,
-  PinnedCardStack, EcosystemSection, RotatingBadge, FooterWatermark,
+  RotatingWord, LiveFeedCard, StatementSection, StickyFeatures, EcosystemSection, RotatingBadge, FooterWatermark,
 } from '../components/landing/Showcase';
+import { ForWhomSection, CoverageSection, PinnedCardStack, GiantFinale } from '../components/landing/Premium';
 import {
-  Reveal, SplitText, CountUp, Magnetic, ScrollProgress, useSpotlight, useParallax, GiantScrollText,
+  Reveal, SplitText, CountUp, Magnetic, ScrollProgress, useSpotlight, useParallax,
 } from '../components/ui/Motion';
 
 const NAVY = '#0F2A3D';
+// Pays réellement pré-configurés (hors l'entrée générique « Autre pays »).
+const COUNTRY_COUNT = COUNTRIES.filter((c) => c.code !== 'XX').length;
 const GREEN = '#0057D9';
 
 // lucide-react n'a pas d'icône TikTok officielle : SVG dédié, même style que les autres (stroke).
@@ -250,7 +252,7 @@ export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [annual, setAnnual] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [showMatrix, setShowMatrix] = useState(false);
 
   useEffect(() => {
@@ -456,7 +458,7 @@ export default function LandingPage() {
       <section className="py-14 bg-white dark:bg-surface-0 border-b border-gray-100 dark:border-surface-3">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-2 lg:grid-cols-4 gap-8">
           {[
-            { to: COUNTRIES.length, suffix: '', decimals: 0, label: t('landing.statCountries') },
+            { to: COUNTRY_COUNT, suffix: '', decimals: 0, label: t('landing.statCountries') },
             { to: MODULES.length, suffix: '', decimals: 0, label: t('landing.statModules') },
             { to: 99.9, suffix: '%', decimals: 1, label: t('landing.statSla') },
             { to: 30, suffix: isEn ? ' days' : ' j', decimals: 0, label: t('landing.statTrial') },
@@ -489,7 +491,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <StatementSection countries={COUNTRIES.length} currencies={COMMON_CURRENCIES.length} />
+      <StatementSection countries={COUNTRY_COUNT} currencies={COMMON_CURRENCIES.length} />
 
       {/* ===== PENSÉ POUR L'AFRIQUE ===== */}
       <section className="py-20 bg-gray-50 dark:bg-surface-0">
@@ -510,14 +512,14 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {(isEn ? [
-              { icon: Globe, title: `${COUNTRIES.length} countries supported`, desc: 'Cameroon, Senegal, Ivory Coast, Nigeria, Kenya, Ghana, France, UAE, and more. Regions, cities, currencies, VAT rates — all pre-configured.' },
+              { icon: Globe, title: `${COUNTRY_COUNT} countries supported`, desc: 'Cameroon, Senegal, Ivory Coast, Nigeria, Kenya, Ghana, France, UAE, and more. Regions, cities, currencies, VAT rates — all pre-configured.' },
               { icon: Wifi, title: 'Offline-first', desc: 'Unstable connection? No problem. Create invoices and transactions offline. Syncing happens automatically once the network is back.' },
               { icon: Smartphone, title: 'Native Mobile Money', desc: 'Orange Money, MTN MoMo, Wave, Moov Money. Collect, track, reconcile — without leaving the app.' },
               { icon: Shield, title: 'Native OHADA', desc: 'Revised SYSCOHADA chart pre-configured. Balance sheet, income statement, filings — OHADA-compliant.' },
               { icon: Languages, title: 'Bilingual FR / EN', desc: 'The full interface, in French and English. Switch in one click, for your whole team.' },
               { icon: Zap, title: 'Fast & lightweight', desc: 'Installable PWA, under 3MB. Works on phone, tablet, desktop. Even on a Samsung A10.' },
             ] : [
-              { icon: Globe, title: `${COUNTRIES.length} pays supportés`, desc: 'Cameroun, Sénégal, Côte d\'Ivoire, Nigeria, Kenya, Ghana, France, Émirats Arabes Unis, et plus. Régions, villes, devises, taux de TVA — tout est pré-configuré.' },
+              { icon: Globe, title: `${COUNTRY_COUNT} pays supportés`, desc: 'Cameroun, Sénégal, Côte d\'Ivoire, Nigeria, Kenya, Ghana, France, Émirats Arabes Unis, et plus. Régions, villes, devises, taux de TVA — tout est pré-configuré.' },
               { icon: Wifi, title: 'Offline-first', desc: 'Connexion instable ? Aucun problème. Créez factures et mouvements hors ligne. La synchronisation est automatique au retour du réseau.' },
               { icon: Smartphone, title: 'Mobile Money natif', desc: 'Orange Money, MTN MoMo, Wave, Moov Money. Encaissez, suivez, rapprochez — sans quitter l\'application.' },
               { icon: Shield, title: 'OHADA natif', desc: 'Plan SYSCOHADA révisé pré-configuré. Bilan, compte de résultat, déclarations — conformes aux normes OHADA.' },
@@ -538,7 +540,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <UseCaseCards />
+      <ForWhomSection />
 
       {/* ===== MODULES ===== */}
       <section id="modules" className="py-20 bg-white dark:bg-surface-1">
@@ -580,7 +582,7 @@ export default function LandingPage() {
 
       <StickyFeatures />
 
-      <CoverageSection countries={COUNTRIES.length} currencies={COMMON_CURRENCIES.length} />
+      <CoverageSection currencies={COMMON_CURRENCIES.length} />
 
       <PinnedCardStack />
 
@@ -777,34 +779,43 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ===== FAQ ===== */}
+      {/* ===== FAQ (compacte, 2 colonnes) ===== */}
       <section id="faq" className="py-20 bg-gray-50 dark:bg-surface-0">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <Reveal>
-            <div className="text-center mb-12">
-              <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-4" style={{ background: `${GREEN}15`, color: GREEN }}>
-                FAQ
-              </span>
-              <h2 className="text-3xl lg:text-4xl font-medium mb-4 text-gray-900 dark:text-white">
-                <SplitText text="Questions fréquentes" />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 grid lg:grid-cols-[0.85fr_1.15fr] gap-10 lg:gap-14">
+          <div className="lg:sticky lg:top-28 self-start">
+            <Reveal>
+              <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-4" style={{ background: `${GREEN}15`, color: GREEN }}>FAQ</span>
+              <h2 className="text-3xl lg:text-5xl font-semibold tracking-tight text-gray-900 dark:text-white leading-tight">
+                Questions <span className="font-light">fréquentes.</span>
               </h2>
-            </div>
-          </Reveal>
-
-          <div className="space-y-3">
-            {FAQS.map((faq, i) => (
-              <Reveal key={i} delay={i * 50}>
-                <div className="bg-white dark:bg-surface-1 rounded-xl border border-gray-100 dark:border-surface-3 overflow-hidden">
-                  <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between px-5 py-4 text-left">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{faq.q}</span>
-                    <ChevronDown className={`w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0 transition-transform ${openFaq === i ? 'rotate-180' : ''}`} />
+              <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-sm">Tout ce qu’il faut savoir avant de démarrer. Une autre question ? L’IA Libooks répond en quelques secondes.</p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button onClick={() => window.dispatchEvent(new Event('libooks:open-chat'))} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-semibold shadow-lg shadow-[#0057D9]/30 hover:scale-105 transition-transform" style={{ background: GREEN }}>
+                  <Sparkles className="w-4 h-4" /> Demander à Libooks
+                </button>
+                <Link to={isEn ? '/en/contact' : '/contact'} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold border border-gray-300 dark:border-surface-3 text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-surface-2">Contacter l’équipe</Link>
+              </div>
+            </Reveal>
+          </div>
+          <div className="divide-y divide-gray-200 dark:divide-surface-3 border-y border-gray-200 dark:border-surface-3">
+            {FAQS.map((faq, i) => {
+              const open = openFaq === i;
+              return (
+                <div key={i}>
+                  <button onClick={() => setOpenFaq(open ? null : i)} aria-expanded={open} className="w-full flex items-center justify-between gap-4 py-4 text-left group">
+                    <span className={`text-[15px] font-medium transition-colors ${open ? 'text-[#0057D9]' : 'text-gray-900 dark:text-white group-hover:text-[#0057D9]'}`}>{faq.q}</span>
+                    <span className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center border transition-all duration-300 ${open ? 'bg-[#0057D9] border-[#0057D9] text-white rotate-45' : 'border-gray-300 dark:border-surface-3 text-gray-500'}`}>
+                      <span className="text-lg leading-none -mt-0.5">+</span>
+                    </span>
                   </button>
-                  <div className={`overflow-hidden transition-all duration-300 ${openFaq === i ? 'max-h-96' : 'max-h-0'}`}>
-                    <p className="px-5 pb-4 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{faq.a}</p>
+                  <div className={`grid transition-all duration-500 ease-out ${open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                    <p className="overflow-hidden text-sm text-gray-600 dark:text-gray-400 leading-relaxed pr-12">
+                      <span className="block pb-4">{faq.a}</span>
+                    </p>
                   </div>
                 </div>
-              </Reveal>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -835,15 +846,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ===== SIGNATURE GÉANTE ===== */}
-      <section className="relative bg-white dark:bg-surface-0 border-t border-gray-100 dark:border-surface-3">
-        <GiantScrollText lines={[
-          { words: [{ text: 'LIBOOKS' }, { text: 'DEV', outline: true }, { text: 'BY', outline: true }, { text: 'LIAFRIK', accent: true }, { text: 'TECH' }] },
-          { words: [{ text: 'COMPTABILITÉ', outline: true }, { text: 'AFRICAINE' }, { text: 'DE', outline: true }, { text: 'RÉFÉRENCE', accent: true }] },
-          { words: [{ text: 'FACTURER' }, { text: 'ENCAISSER', outline: true }, { text: 'PILOTER', accent: true }, { text: 'GRANDIR', outline: true }] },
-        ]} />
-        <p className="sr-only">LiBooks, développé par Liafrik Tech — la comptabilité africaine de référence.</p>
-      </section>
+      {/* ===== FINALE GÉANTE ===== */}
+      <GiantFinale />
 
       <FlagScrollBanner />
 

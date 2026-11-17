@@ -234,3 +234,6 @@ body {
   font-family: 'Outfit', 'Outfit Variable', sans-serif;
 }
 @media (prefers-reduced-motion: reduce) { .lb-watermark { animation: none; } }
+
+.lb-outline-dark { color: #0a1620 !important; -webkit-text-stroke: 4px rgba(255,255,255,.75); paint-order: stroke fill; }
+@media (max-width: 640px) { .lb-outline-dark { -webkit-text-stroke-width: 2.4px; } }

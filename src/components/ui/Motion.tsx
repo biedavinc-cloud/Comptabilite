@@ -217,3 +217,31 @@ export function GiantScrollText({ lines }: { lines: { words: { text: string; out
     </div>
   );
 }
+
+/** Progression 0→1 d'un élément traversant le viewport (rAF-throttlé). */
+export function useScrollProgress<T extends HTMLElement>(mode: 'through' | 'pinned' = 'through') {
+  const ref = useRef<T>(null);
+  const [p, setP] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (prefersReducedMotion()) { setP(mode === 'pinned' ? 0.5 : 1); return; }
+    let raf = 0;
+    const update = () => {
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const v = mode === 'pinned'
+        ? -r.top / Math.max(1, r.height - vh)
+        : (vh - r.top) / (vh + r.height);
+      setP(Math.min(1, Math.max(0, v)));
+      raf = 0;
+    };
+    const on = () => { if (!raf) raf = requestAnimationFrame(update); };
+    window.addEventListener('scroll', on, { passive: true });
+    window.addEventListener('resize', on);
+    update();
+    return () => { window.removeEventListener('scroll', on); window.removeEventListener('resize', on); };
+  }, [mode]);
+  return { ref, p };
+}
+

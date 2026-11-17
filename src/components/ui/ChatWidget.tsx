@@ -63,10 +63,20 @@ export default function ChatWidget() {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
+  // Bulle d'invitation : une seule fois par session, quelques secondes.
   useEffect(() => {
-    const t = setTimeout(() => setTeaser(true), 6000);
-    return () => clearTimeout(t);
+    if (sessionStorage.getItem('libooks_teaser_seen')) return;
+    const show = setTimeout(() => { setTeaser(true); sessionStorage.setItem('libooks_teaser_seen', '1'); }, 8000);
+    const hide = setTimeout(() => setTeaser(false), 14000);
+    return () => { clearTimeout(show); clearTimeout(hide); };
   }, []);
+
+  // Ouverture depuis n'importe où (ex. bouton « Demander à Libooks » de la FAQ)
+  useEffect(() => {
+    const onOpen = () => openChat();
+    window.addEventListener('libooks:open-chat', onOpen);
+    return () => window.removeEventListener('libooks:open-chat', onOpen);
+  });
 
   useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 150); }, [open]);
 
@@ -192,26 +202,21 @@ export default function ChatWidget() {
   return (
     <>
       {!open && (
-        <div className="fixed bottom-5 right-5 z-50 flex items-end gap-3">
+        <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-50 flex items-center gap-2">
           {teaser && (
-            <button onClick={openChat} className="hidden sm:block max-w-[220px] text-left bg-white dark:bg-surface-1 rounded-2xl rounded-br-sm shadow-xl ring-1 ring-gray-100 dark:ring-surface-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-200 animate-fade-in">
-              <span className="font-semibold text-[#0057D9]">Libooks IA</span> — {isFr ? 'une question comptable ? Je réponds en quelques secondes.' : 'an accounting question? I answer in seconds.'}
+            <button onClick={openChat} className="hidden md:block text-left bg-white dark:bg-surface-1 rounded-full shadow-lg ring-1 ring-gray-100 dark:ring-surface-3 pl-4 pr-3 py-2 text-xs text-gray-700 dark:text-gray-200 animate-fade-in">
+              {isFr ? 'Une question ? Demandez à l’IA' : 'Questions? Ask the AI'}
             </button>
           )}
           <button
             onClick={openChat}
-            className="group relative flex items-center gap-2 h-14 pl-2.5 pr-2.5 sm:pl-3 sm:pr-5 rounded-full text-white shadow-xl shadow-[#0057D9]/40 hover:shadow-2xl hover:scale-105 transition-all"
-            style={{ background: 'linear-gradient(135deg,#0057D9 0%,#3B82F6 50%,#8B5CF6 100%)' }}
-            aria-label="Libooks — assistant IA"
+            className="group relative w-14 h-14 rounded-full text-white shadow-xl shadow-[#0057D9]/40 hover:scale-110 transition-transform flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg,#0057D9 0%,#3B82F6 55%,#8B5CF6 100%)' }}
+            aria-label={isFr ? 'Ouvrir l’assistant IA Libooks' : 'Open the Libooks AI assistant'}
+            title="Libooks IA"
           >
-            <span className="absolute inset-0 rounded-full animate-ping bg-[#0057D9]/30 [animation-duration:2.5s]" />
-            <span className="relative w-9 h-9 rounded-full bg-white flex items-center justify-center">
-              <img src={logo} alt="" className="w-6 h-6" />
-            </span>
-            <span className="relative hidden sm:flex flex-col leading-tight text-left">
-              <span className="text-sm font-semibold">Libooks</span>
-              <span className="text-[10px] text-white/80 flex items-center gap-1"><Sparkles className="w-3 h-3" /> {isFr ? 'Assistant IA' : 'AI assistant'}</span>
-            </span>
+            <span className="absolute inset-0 rounded-full animate-ping bg-[#0057D9]/25 [animation-duration:3s]" />
+            <Sparkles className="relative w-6 h-6" />
           </button>
         </div>
       )}
